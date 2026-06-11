@@ -1,0 +1,366 @@
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design Tokens v4.0: Precision Trust
+ * 基于「设计风格重塑-完整方案」§四
+ * 核心：品牌色 <5% / 信任琥珀色 <2% / 95% 灰度构建 / 蓝灰调阴影 / 3档字重 / 8px圆角
+ *
+ * 颜色体系：
+ *   --brand #4255D4  靛蓝（仅 CTA/价格/选中态）
+ *   --trust #B8860B  琥珀金（仅信用分/认证标识）
+ *   其余 95% 界面由灰度层级构建
+ */
+
+:root {
+  /* ===== 品牌色（靛蓝系）— 界面占比 < 5% ===== */
+  --brand:                #4255D4;
+  --brand-hover:          #3545C0;
+  --brand-pressed:        #2A38A8;
+  --brand-subtle:         #EBEFFA;
+  --brand-ring:           rgba(66,85,212,0.20);
+
+  /* ===== 信任色（琥珀金）— 界面占比 < 2%，仅用于信用信号 ===== */
+  --trust:                #B8860B;
+  --trust-bg:             #FFF8EB;
+  --trust-border:         rgba(184,134,11,0.20);
+
+  /* ===== 背景层级（5 级 — 灰度构建） ===== */
+  --bg-root:              #F6F7F9;
+  --bg-subtle:            #EFF1F5;
+  --bg-surface:           #FFFFFF;
+  --bg-hover:             #F2F4F8;
+  --bg-selected:          #EBF0FA;
+  --bg-hero:              #0D1117;                 /* Hero 深色区 */
+
+  /* ===== 文字层级（4 级 + 反色） ===== */
+  --text-primary:         #0D1117;
+  --text-secondary:       #5B6270;
+  --text-tertiary:        #8E94A0;
+  --text-disabled:        #C4C8D0;
+  --text-inverse:         #FAFBFD;
+  --text-inverse-muted:   #A0A8B4;
+
+  /* ===== 边框层级 ===== */
+  --border-subtle:        rgba(13,17,23,0.06);
+  --border-default:       rgba(13,17,23,0.10);
+  --border-strong:        rgba(13,17,23,0.16);
+  --border-brand:         rgba(66,85,212,0.30);
+
+  /* ===== 语义色（4 组，严格收敛） ===== */
+  --success:              #0F7B4E;
+  --success-bg:           #ECF8F2;
+  --success-border:       rgba(15,123,78,0.20);
+  --warning:              #B85C0C;
+  --warning-bg:           #FEF7EE;
+  --warning-border:       rgba(184,92,12,0.20);
+  --danger:               #D92D3C;
+  --danger-bg:            #FEF0F2;
+  --danger-border:        rgba(217,45,60,0.20);
+  --info:                 #2B6FCF;
+  --info-bg:              #EDF4FD;
+  --info-border:          rgba(43,111,207,0.20);
+
+  /* ===== 信用等级色（5 级 — 平台核心信任基础设施） ===== */
+  --credit-elite:         #1e8050;
+  --credit-elite-bg:      #e4f5ec;
+  --credit-excellent:     #0e82a8;
+  --credit-excellent-bg:  #e3f5fb;
+  --credit-fair:          #8E94A0;
+  --credit-fair-bg:       #F2F4F8;
+  --credit-poor:          #B85C0C;
+  --credit-poor-bg:       #FEF7EE;
+  --credit-bad:           var(--danger);
+  --credit-bad-bg:        var(--danger-bg);
+
+  /* ===== AI标签分类色（3 类） ===== */
+  --tag-skill:            #2563eb;
+  --tag-skill-bg:         #eff6ff;
+  --tag-industry:         #16a34a;
+  --tag-industry-bg:      #f0fdf4;
+  --tag-feature:          #ea580c;
+  --tag-feature-bg:       #fff7ed;
+
+  /* ===== 任务类型色板（7 种，从方案继承优化） ===== */
+  --type-software:        #1D6DB5;
+  --type-software-bg:     #EDF4FB;
+  --type-design:          #6B40C8;
+  --type-design-bg:       #F2ECFA;
+  --type-video:           #B83878;
+  --type-video-bg:        #FCEAF3;
+  --type-writing:         #1E8C58;
+  --type-writing-bg:      #EAF6F0;
+  --type-review:          #B86C10;
+  --type-review-bg:       #FDF4E5;
+  --type-marketing:       #9050D0;
+  --type-marketing-bg:    #F3ECFA;
+  --type-hardware:        #0E82A8;
+  --type-hardware-bg:     #E6F5FB;
+
+  /* ===== 阴影系统（蓝灰基调 — Stripe 策略） ===== */
+  --shadow-card:          0 1px 3px rgba(13,17,23,0.03), 0 1px 2px rgba(13,17,23,0.02);
+  --shadow-card-hover:    0 4px 14px rgba(13,17,23,0.05), 0 2px 6px rgba(13,17,23,0.03);
+  --shadow-dropdown:      0 8px 28px rgba(13,17,23,0.06), 0 2px 8px rgba(13,17,23,0.03);
+  --shadow-modal:         0 16px 48px rgba(13,17,23,0.08), 0 4px 16px rgba(13,17,23,0.04);
+  --shadow-glow:          0 0 0 3px rgba(66,85,212,0.15);
+
+  /* ===== 圆角系统（3 档 + 全圆） ===== */
+  --radius-sm:            6px;
+  --radius-md:            8px;
+  --radius-lg:            12px;
+  --radius-full:          9999px;
+
+  /* ===== 字体系统（Inter · 3 档字重 400/500/600） ===== */
+  --font-sans:            'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:            'JetBrains Mono', 'Fira Code', 'Geist Mono', monospace;
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+
+  /* 字号阶梯（4px 基准，Linear 策略） */
+  --text-hero:            28px;
+  --text-xl:              22px;
+  --text-lg:              17px;
+  --text-base:            15px;
+  --text-sm:              13px;
+  --text-xs:              12px;
+  --text-2xs:             11px;
+  --font-size:            15px;                     /* 基础字号 */
+
+  /* ===== 间距系统（4px 基准 — 参考用，Tailwind 处理实现） ===== */
+
+  /* ===== 过渡规范（150ms 全局 · Linear/Stripe 策略） ===== */
+  --transition-fast:      150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-modal:     200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-expo:            cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ===== 向后兼容别名 ===== */
+  --brand-bg:             var(--brand-subtle);
+  --surface-page:         var(--bg-root);
+  --surface-card:         var(--bg-surface);
+  --surface-hero:         var(--bg-hero);
+  --surface-hover:        var(--bg-hover);
+  --surface-selected:     var(--bg-selected);
+  --surface-disabled:     var(--bg-subtle);
+
+  --success-text:         var(--success);
+  --warning-text:         var(--warning);
+  --danger-text:          var(--danger);
+  --info-text:            var(--info);
+
+  --duration-fast:        150ms;
+  --duration-normal:      200ms;
+
+  /* ===== shadcn/ui 兼容映射 ===== */
+  --background:            var(--bg-root);
+  --foreground:            var(--text-primary);
+  --card:                  var(--bg-surface);
+  --card-foreground:       var(--text-primary);
+  --popover:               var(--bg-surface);
+  --popover-foreground:    var(--text-primary);
+  --primary:               var(--brand);
+  --primary-foreground:    #FFFFFF;
+  --secondary:             var(--bg-subtle);
+  --secondary-foreground:  var(--text-primary);
+  --muted:                 var(--bg-subtle);
+  --muted-foreground:      var(--text-tertiary);
+  --accent:                var(--bg-hover);
+  --accent-foreground:     var(--text-primary);
+  --destructive:           var(--danger);
+  --destructive-foreground: #FFFFFF;
+  --border:                var(--border-subtle);
+  --input:                 transparent;
+  --input-background:      var(--bg-hover);
+  --switch-background:     rgba(13,17,23,0.16);
+  --ring:                  var(--brand-ring);
+  --sidebar:               var(--bg-root);
+  --sidebar-foreground:    var(--text-primary);
+  --sidebar-primary:       var(--brand);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:        var(--bg-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border:        var(--border-subtle);
+  --sidebar-ring:          var(--brand-ring);
+}
+
+/* ===== 暗色模式 ===== */
+.dark {
+  --bg-root:              #0D1117;
+  --bg-subtle:            #161B22;
+  --bg-surface:           #1C2128;
+  --bg-hover:             #21262D;
+  --bg-selected:          #1A2440;
+  --bg-hero:              #090C10;
+
+  --text-primary:         #E6EDF3;
+  --text-secondary:       #8B949E;
+  --text-tertiary:        #6E7681;
+  --text-disabled:        #484F58;
+
+  --border-subtle:        rgba(230,237,243,0.06);
+  --border-default:       rgba(230,237,243,0.10);
+  --border-strong:        rgba(230,237,243,0.16);
+
+  --shadow-card:          0 1px 3px rgba(0,0,0,0.12);
+  --shadow-card-hover:    0 4px 14px rgba(0,0,0,0.18);
+  --shadow-modal:         0 16px 48px rgba(0,0,0,0.25);
+
+  --background:            var(--bg-root);
+  --foreground:            var(--text-primary);
+  --card:                  var(--bg-surface);
+  --card-foreground:       var(--text-primary);
+  --primary:               #5B6BE8;
+  --primary-foreground:    #FFFFFF;
+  --secondary:             var(--bg-subtle);
+  --secondary-foreground:  var(--text-primary);
+  --muted:                 var(--bg-subtle);
+  --muted-foreground:      var(--text-tertiary);
+  --accent:                var(--bg-hover);
+  --accent-foreground:     var(--text-primary);
+  --destructive:           #F85149;
+  --destructive-foreground: #FFFFFF;
+  --border:                var(--border-subtle);
+  --input:                 var(--bg-surface);
+  --input-background:      var(--bg-hover);
+  --switch-background:     rgba(230,237,243,0.16);
+  --sidebar:               var(--bg-subtle);
+  --sidebar-foreground:    var(--text-primary);
+  --sidebar-primary:       #5B6BE8;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:        var(--bg-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border:        var(--border-subtle);
+  --sidebar-ring:          var(--brand-ring);
+  /* ===== 信用等级色 — 暗色覆盖 ===== */
+  --credit-elite:        #34d399;
+  --credit-elite-bg:     rgba(52,211,153,0.12);
+  --credit-excellent:    #38bdf8;
+  --credit-excellent-bg: rgba(56,189,248,0.12);
+  --credit-fair:         #94a3b8;
+  --credit-fair-bg:      rgba(148,163,184,0.12);
+  --credit-poor:         #fbbf24;
+  --credit-poor-bg:      rgba(251,191,36,0.12);
+
+  /* ===== AI标签分类色 — 暗色覆盖 ===== */
+  --tag-skill:           #60a5fa;
+  --tag-skill-bg:        rgba(96,165,250,0.12);
+  --tag-industry:        #4ade80;
+  --tag-industry-bg:     rgba(74,222,128,0.12);
+  --tag-feature:         #fb923c;
+  --tag-feature-bg:      rgba(251,146,60,0.12);
+
+  /* ===== 语义色 — 暗色覆盖 ===== */
+  --success:             #3FB950;
+  --success-bg:          rgba(63,185,80,0.12);
+  --success-border:      rgba(63,185,80,0.25);
+  --warning:             #D29922;
+  --warning-bg:          rgba(210,153,34,0.12);
+  --warning-border:      rgba(210,153,34,0.25);
+  --danger:              #F85149;
+  --danger-bg:           rgba(248,81,73,0.12);
+  --danger-border:       rgba(248,81,73,0.25);
+  --info:                #58A6FF;
+  --info-bg:             rgba(88,166,255,0.12);
+  --info-border:         rgba(88,166,255,0.25);
+
+  /* ===== 品牌色 — 暗色覆盖 ===== */
+  --brand:               #5B6BE8;
+  --brand-hover:         #4F5DDB;
+  --brand-pressed:       #4350C8;
+  --brand-subtle:        rgba(91,107,232,0.10);
+  --brand-ring:          rgba(91,107,232,0.25);
+
+  /* ===== 信任色 — 暗色覆盖 ===== */
+  --trust:               #D4A72C;
+  --trust-bg:            rgba(212,167,44,0.12);
+  --trust-border:        rgba(212,167,44,0.25);
+
+  /* ===== 边框 — 暗色覆盖（补充） ===== */
+  --border-brand:        rgba(91,107,232,0.35);
+
+  /* ===== 反色文字 — 暗色覆盖 ===== */
+  --text-inverse:        #0D1117;
+  --text-inverse-muted:  #484F58;
+
+  /* ===== 信用等级（补充） — 暗色覆盖 ===== */
+  --credit-bad:          var(--danger);
+  --credit-bad-bg:       var(--danger-bg);
+
+  /* ===== 阴影 — 暗色覆盖（补充） ===== */
+  --shadow-dropdown:     0 8px 28px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
+  --shadow-glow:         0 0 0 3px rgba(91,107,232,0.20);
+
+  /* ===== shadcn/ui — 暗色覆盖（补充） ===== */
+  --popover:             var(--bg-surface);
+  --popover-foreground:  var(--text-primary);
+  --ring:                var(--brand-ring);
+}
+
+/* ===== Tailwind v4 @theme inline 注册 ===== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius-sm) - 2px);
+  --radius-md: calc(var(--radius-md) - 2px);
+  --radius-lg: var(--radius-lg);
+}
+
+/* ===== 全局基础层 ===== */
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; }
+  html { font-size: var(--font-size); }
+  h1 { font-size: var(--text-hero); font-weight: var(--font-weight-semibold); line-height: 1.3; letter-spacing: -0.01em; }
+  h2 { font-size: var(--text-xl); font-weight: var(--font-weight-semibold); line-height: 1.35; letter-spacing: -0.01em; }
+  h3 { font-size: var(--text-lg); font-weight: var(--font-weight-semibold); line-height: 1.4; }
+  h4 { font-size: var(--text-base); font-weight: var(--font-weight-semibold); line-height: 1.5; }
+  label { font-size: var(--text-sm); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  button { font-size: var(--text-sm); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  input, textarea, select { font-size: var(--text-sm); font-weight: var(--font-weight-regular); line-height: 1.5; }
+}
+
+/* ===== 动画关键帧 ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }

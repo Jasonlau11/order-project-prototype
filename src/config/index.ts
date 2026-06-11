@@ -1,0 +1,1 @@
+﻿export { orderStatusConfig } from './orderStatusConfig';
