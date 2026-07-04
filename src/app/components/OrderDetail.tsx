@@ -3,6 +3,7 @@ import {
   X, Calendar, DollarSign, User, Clock, CheckCircle, AlertCircle,
   Upload, Download, FileText, Wrench, Key,
   Sparkles, Edit2, ChevronDown, ChevronRight, ChevronUp, BookOpen, Tag, Building2, Clock4, ShieldCheck,
+  ReceiptText, RotateCcw, PlusCircle,
 } from 'lucide-react';
 import { DeliveryToolConfigModal } from './DeliveryToolConfigModal';
 import { DeliveryToolResourceModal } from './DeliveryToolResourceModal';
@@ -29,6 +30,21 @@ interface Milestone {
     submitTime?: string;
   };
   rejectReason?: string;
+}
+
+type RelatedBillStatus = 'draft' | 'pending_confirm' | 'pending_payment' | 'paid' | 'booked' | 'refund_pending' | 'refund_confirm' | 'written_off' | 'closed';
+type RelatedBillType = 'whole' | 'phase' | 'final' | 'adjustment';
+
+interface RelatedBill {
+  id: string;
+  type: RelatedBillType;
+  status: RelatedBillStatus;
+  amount: number | null;
+  milestoneId?: number;
+  milestoneLabel?: string;
+  nature?: '正常结算' | '补充结算' | '合同退款' | '违约金' | '赔偿金' | '终止冲销';
+  createdAt: string;
+  description: string;
 }
 
 interface OrderDetailProps {
@@ -205,6 +221,40 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
     }
   ]);
 
+  const [relatedBills, setRelatedBills] = useState<RelatedBill[]>([
+    {
+      id: 'BL-2026-0001',
+      type: 'phase',
+      status: 'paid',
+      amount: 40000,
+      milestoneId: 1,
+      milestoneLabel: '第一阶段：需求分析与设计',
+      nature: '正常结算',
+      createdAt: '2026-03-15',
+      description: '里程碑 #1 双方确认完成后自动生成，已完成线下支付与确认收款。',
+    },
+    {
+      id: 'BL-2026-0002',
+      type: 'phase',
+      status: 'pending_payment',
+      amount: 35000,
+      milestoneId: 2,
+      milestoneLabel: '第二阶段：前端开发',
+      nature: '正常结算',
+      createdAt: '2026-04-15',
+      description: '里程碑 #2 交付物已提交，待客户验收通过后继续推进支付。',
+    },
+    {
+      id: 'BL-2026-0006',
+      type: 'final',
+      status: 'draft',
+      amount: null,
+      nature: '正常结算',
+      createdAt: '2026-05-20',
+      description: '全部里程碑通过后自动创建尾款草稿，可选择无尾款、0 元尾款或填写正额尾款。',
+    },
+  ]);
+  const [billToast, setBillToast] = useState('');
   const [showMilestoneConfig, setShowMilestoneConfig] = useState(false);
   const [showMilestoneEdit, setShowMilestoneEdit] = useState(false);
   const [showMilestoneSubmit, setShowMilestoneSubmit] = useState(false);
@@ -238,7 +288,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
     );
 
     // 观察所有模块
-    const allIds = [...modules.map((m) => m.id), 'module-milestones-progress', 'module-milestones', 'module-delivery-tools'];
+    const allIds = [...modules.map((m) => m.id), 'module-milestones-progress', 'module-milestones', 'module-related-bills', 'module-termination-settlement', 'module-delivery-tools'];
     for (const id of allIds) {
       const el = document.getElementById(id);
       if (el) {
@@ -271,10 +321,25 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
     }
     setTerminatedReason(terminateReason);
     setOrderData(prev => ({ ...prev, status: 'terminated' }));
+    setRelatedBills(prev => [
+      ...prev.map(b => ['draft', 'pending_confirm', 'pending_payment'].includes(b.status)
+        ? { ...b, status: 'written_off' as RelatedBillStatus, nature: '终止冲销' as const, description: `${b.description} 订单终止后，该未结账单进入冲销/关闭处理。` }
+        : b
+      ),
+      {
+        id: `ADJ-${new Date().getFullYear()}-${String(prev.length + 1).padStart(4, '0')}`,
+        type: 'adjustment',
+        status: 'draft',
+        amount: null,
+        nature: '终止冲销',
+        createdAt: new Date().toISOString().slice(0, 10),
+        description: '订单终止后由运营人工审核双方协议，必要时创建退款、赔偿或补充结算调账单。',
+      },
+    ]);
+    setBillToast('订单已终止：未结账单已进入冲销/关闭处理，并生成终止后调账草稿供运营审核。');
     if (onTerminateOrder) onTerminateOrder(orderData.id);
     setShowTerminateModal(false);
     setTerminateReason('');
-    alert('订单已终止');
   };
 
   if (!isOpen) return null;
@@ -314,12 +379,139 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
     return <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
   };
 
+  const billTypeLabel: Record<RelatedBillType, string> = {
+    whole: '整单账单',
+    phase: '阶段账单',
+    final: '尾款账单',
+    adjustment: '调账单',
+  };
+
+  const billStatusConfig: Record<RelatedBillStatus, { label: string; color: string }> = {
+    draft: { label: '草稿待填价', color: 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' },
+    pending_confirm: { label: '待确认', color: 'bg-[var(--warning-bg)] text-[var(--warning)]' },
+    pending_payment: { label: '待支付', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
+    paid: { label: '已支付', color: 'bg-[var(--success-bg)] text-[var(--success)]' },
+    booked: { label: '已入账', color: 'bg-[var(--success-bg)] text-[var(--success)]' },
+    refund_pending: { label: '待退款', color: 'bg-purple-50 text-purple-700' },
+    refund_confirm: { label: '退款待确认', color: 'bg-orange-50 text-orange-700' },
+    written_off: { label: '已冲销', color: 'bg-[var(--danger-bg)] text-[var(--danger)]' },
+    closed: { label: '已关闭', color: 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' },
+  };
+
+  const formatBillAmount = (amount: number | null) => amount === null ? '待填写' : amount === 0 ? '¥0' : `¥${amount.toLocaleString()}`;
+
+  const billCompletionCount = relatedBills.filter(b => ['paid', 'booked', 'closed', 'written_off'].includes(b.status)).length;
+
   // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
+
+  function renderRelatedBillsCard() {
+    return (
+      <CollapsibleCard
+        id="module-related-bills"
+        title="关联账单"
+        icon={<ReceiptText className="w-5 h-5 text-[var(--brand)]" />}
+        defaultOpen={!allCollapsed}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between rounded-md px-4 py-3" style={{ backgroundColor: 'var(--brand-subtle)', border: '1px solid var(--brand-ring)' }}>
+            <div>
+              <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>订单账单闭环</div>
+              <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                阶段账单、尾款账单与调账单均在此关联展示；订单已结算需全部应结账单达到完成态。
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[18px] font-semibold" style={{ color: 'var(--brand)' }}>{billCompletionCount}/{relatedBills.length}</div>
+              <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>已闭环</div>
+            </div>
+          </div>
+
+          {billToast && (
+            <div className="flex items-start gap-2 rounded-md px-3 py-2 text-[12px]" style={{ backgroundColor: 'var(--success-bg)', color: 'var(--success)' }}>
+              <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{billToast}</span>
+            </div>
+          )}
+
+          {relatedBills.map(bill => {
+            const status = billStatusConfig[bill.status];
+            return (
+              <div key={bill.id} className="rounded-md border p-4" style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{bill.id}</span>
+                      <span className="px-2 py-0.5 rounded text-[11px]" style={{ color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)' }}>{billTypeLabel[bill.type]}</span>
+                      {bill.nature && <span className="px-2 py-0.5 rounded text-[11px]" style={{ color: 'var(--text-secondary)', backgroundColor: 'var(--bg-hover)' }}>{bill.nature}</span>}
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${status.color}`}>{status.label}</span>
+                    </div>
+                    {bill.milestoneLabel && <div className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>关联里程碑：{bill.milestoneLabel}</div>}
+                    <div className="text-[12px] mt-1 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>{bill.description}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[16px] font-semibold" style={{ color: bill.amount && bill.amount > 0 ? 'var(--brand)' : 'var(--text-secondary)' }}>{formatBillAmount(bill.amount)}</div>
+                    <div className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>{bill.createdAt}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                  <button className="text-[12px] hover:underline" style={{ color: 'var(--brand)' }}>查看账单详情</button>
+                  {bill.status === 'draft' && userRole === 'user' && <button className="text-[12px] hover:underline" style={{ color: 'var(--brand)' }}>填写金额</button>}
+                  {bill.status === 'pending_payment' && userRole === 'customer' && <button className="text-[12px] hover:underline" style={{ color: 'var(--brand)' }}>声明线下支付</button>}
+                  {bill.type === 'adjustment' && <button className="text-[12px] hover:underline" style={{ color: 'var(--warning)' }}>查看终止后结算审核</button>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CollapsibleCard>
+    );
+  }
+
+  function renderTerminationSettlementCard() {
+    if (orderData.status !== 'terminated') return null;
+    const openBills = relatedBills.filter(b => !['paid', 'booked', 'closed', 'written_off'].includes(b.status));
+    const paidBills = relatedBills.filter(b => ['paid', 'booked'].includes(b.status));
+    return (
+      <CollapsibleCard
+        id="module-termination-settlement"
+        title="终止后结算处理"
+        icon={<RotateCcw className="w-5 h-5 text-[var(--danger)]" />}
+        defaultOpen={!allCollapsed}
+      >
+        <div className="space-y-3">
+          <div className="rounded-md p-4" style={{ backgroundColor: 'var(--danger-bg)', border: '1px solid var(--danger)' }}>
+            <div className="text-[13px] font-semibold" style={{ color: 'var(--danger)' }}>订单已终止，平台不自动结算</div>
+            <div className="text-[12px] mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              后续以双方协议与交付事实为准，由运营人工审核。未结账单进入冲销或双方关闭；已支付账单如需退回，走退款/赔偿申请。
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-md border p-3" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>未结待处理</div>
+              <div className="text-[20px] font-semibold" style={{ color: 'var(--danger)' }}>{openBills.length}</div>
+            </div>
+            <div className="rounded-md border p-3" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>已支付需核验</div>
+              <div className="text-[20px] font-semibold" style={{ color: 'var(--brand)' }}>{paidBills.length}</div>
+            </div>
+            <div className="rounded-md border p-3" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>运营调账草稿</div>
+              <div className="text-[20px] font-semibold" style={{ color: 'var(--warning)' }}>{relatedBills.filter(b => b.type === 'adjustment').length}</div>
+            </div>
+          </div>
+          <button className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-[12px] text-white" style={{ backgroundColor: 'var(--brand)' }}>
+            <PlusCircle className="w-3.5 h-3.5" />
+            发起终止后调账申请
+          </button>
+        </div>
+      </CollapsibleCard>
+    );
+  }
 
   // 里程碑时间线渲染（弱结构化）
   function renderMilestoneTimeline(
@@ -549,10 +741,27 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
 
   // 客户：验收里程碑
   const handleApproveMilestone = (milestoneId: number) => {
+    const milestone = milestones.find(m => m.id === milestoneId);
     setMilestones(milestones.map(m =>
       m.id === milestoneId ? { ...m, status: 'passed' } : m
     ));
-    alert(`里程碑 #${milestoneId} 验收通过`);
+    if (milestone && !relatedBills.some(b => b.milestoneId === milestoneId)) {
+      const nextBillId = `BL-2026-${String(relatedBills.length + 1).padStart(4, '0')}`;
+      setRelatedBills(prev => [...prev, {
+        id: nextBillId,
+        type: 'phase',
+        status: 'draft',
+        amount: null,
+        milestoneId,
+        milestoneLabel: milestone.name,
+        nature: '正常结算',
+        createdAt: new Date().toISOString().slice(0, 10),
+        description: `里程碑 #${milestoneId} 已由客户验收通过，系统已自动创建阶段账单草稿，等待接单方填写金额与收款信息。`,
+      }]);
+      setBillToast(`里程碑 #${milestoneId} 已验收通过，已自动生成阶段账单草稿 ${nextBillId}`);
+    } else {
+      setBillToast(`里程碑 #${milestoneId} 已验收通过，对应阶段账单已存在。`);
+    }
   };
 
   // 客户：拒绝里程碑
@@ -769,6 +978,12 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
 
             {/* 里程碑时间线 */}
             {renderMilestoneTimeline(orderData)}
+
+            {/* 关联账单 */}
+            {renderRelatedBillsCard()}
+
+            {/* 终止后结算处理 */}
+            {renderTerminationSettlementCard()}
 
             {/* 交付工具配置模块 - 仅用户在交付中时可见 */}
             {userRole === 'user' && orderData.status === 'inProgress' && (
@@ -990,6 +1205,28 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
                         {mod.title}
                       </button>
                     ))}
+                    <button
+                      onClick={() => scrollToModule('module-related-bills')}
+                      className={`w-full text-left px-3 py-1.5 rounded text-xs transition-colors ${
+                        activeSection === 'module-related-bills'
+                          ? 'bg-[var(--brand-bg)] text-[var(--brand)] font-medium'
+                          : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      关联账单
+                    </button>
+                    {orderData.status === 'terminated' && (
+                      <button
+                        onClick={() => scrollToModule('module-termination-settlement')}
+                        className={`w-full text-left px-3 py-1.5 rounded text-xs transition-colors ${
+                          activeSection === 'module-termination-settlement'
+                            ? 'bg-[var(--brand-bg)] text-[var(--brand)] font-medium'
+                            : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        终止后结算
+                      </button>
+                    )}
                     {orderData.status === 'inProgress' && (
                       <>
                         <button

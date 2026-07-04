@@ -349,7 +349,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
 
   // ── P1#10: Create bill state ────────────────────────────────────────────────
   const [createBillModal, setCreateBillModal] = useState(false);
-  const [newBillForm, setNewBillForm] = useState({ orderSelect: '', billType: '阶段账单', amount: '' });
+  const [newBillForm, setNewBillForm] = useState({ orderSelect: '', billType: '阶段账单', amount: '', reason: '终止后人工补单', nature: '正常结算', relatedBillId: '', needsConfirmation: true });
 
   // ── P1#11: Booking confirmation state ───────────────────────────────────────
   const [bookingConfirmModal, setBookingConfirmModal] = useState<{ billId: string } | null>(null);
@@ -513,7 +513,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
 
   const handleCreateBill = () => {
     if (!newBillForm.orderSelect || !newBillForm.amount) return;
-    const newId = `BL-2026-${String(billingData.length + 1).padStart(4, '0')}`;
+    const newId = newBillForm.billType === '调账单' ? `ADJ-2026-${String(billingData.length + 1).padStart(4, '0')}` : `BL-2026-${String(billingData.length + 1).padStart(4, '0')}`;
     const selectedOrder = ordersData.find(o => String(o.id) === newBillForm.orderSelect);
     setBillingData(prev => [...prev, {
       id: newId,
@@ -532,7 +532,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
       paymentRef: '',
     }]);
     setCreateBillModal(false);
-    setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '' });
+    setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '', reason: '终止后人工补单', nature: '正常结算', relatedBillId: '', needsConfirmation: true });
   };
 
   const pendingOrders = ordersData.filter(o =>
@@ -700,7 +700,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                     <button
                       onClick={() => setCreateBillModal(true)}
                       className="px-3 py-1.5 text-[11px] rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--brand)] hover:text-[var(--brand)] transition-colors"
-                    >创建账单</button>
+                    >创建人工账单</button>
                     <button
                       onClick={() => { setActiveModule('billing'); }}
                       className="px-3 py-1.5 text-[11px] rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--brand)] hover:text-[var(--brand)] transition-colors"
@@ -1320,7 +1320,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                     className="flex items-center gap-1.5 px-4 py-2 bg-[var(--brand)] text-white rounded-full text-[13px] hover:bg-[var(--brand-hover)] transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>创建账单</span>
+                    <span>创建人工账单</span>
                   </button>
                   {billingData.filter(b => b.status === 'paid').length > 0 && (
                     <button
@@ -1515,7 +1515,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                   </table>
                 </div>
                 <div className="mt-3 text-[11px] text-[#bbb]">
-                  一期账单均为线下结算渠道；运营可创建账单、标记入账、代确认申诉或冲销账单。二期将接入在线支付并增加「支付中」状态。
+                  一期账单均为线下结算渠道；运营可创建人工账单/调账单、标记入账、代确认申诉或冲销账单。调账单用于终止结算、补充结算、退款赔偿等异常场景。二期将接入在线支付并增加「支付中」状态。
                 </div>
               </div>
             </div>
@@ -1802,17 +1802,36 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
         </div>
       )}
 
-      {/* ── P1#10: 创建账单弹窗 ── */}
+      {/* ── P1#10: 创建人工账单/调账单弹窗 ── */}
       {createBillModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-md shadow-[var(--shadow-modal)] max-w-md w-full">
-            <div className="flex items-center justify-between p-5 border-b border-[var(--border-subtle)]">
-              <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">创建账单</h3>
-              <button onClick={() => { setCreateBillModal(false); setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '' }); }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
+          <div className="bg-white rounded-md shadow-[var(--shadow-modal)] max-w-lg w-full max-h-[90vh] overflow-auto">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--border-subtle)] sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">创建人工账单 / 调账单</h3>
+                <p className="text-[11px] text-[var(--text-tertiary)] mt-1">用于终止结算、补充结算、退款赔偿、历史补单等非标准出账场景</p>
+              </div>
+              <button onClick={() => { setCreateBillModal(false); setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '', reason: '终止后人工补单', nature: '正常结算', relatedBillId: '', needsConfirmation: true }); }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-5 space-y-4">
+              <div>
+                <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">账单类型 <span className="text-[var(--danger)]">*</span></div>
+                <div className="flex gap-2 flex-wrap">
+                  {['阶段账单', '尾款账单', '整单账单', '调账单'].map(type => (
+                    <button
+                      key={type}
+                      onClick={() => setNewBillForm(prev => ({ ...prev, billType: type }))}
+                      className={`px-3 py-2 rounded-md text-[13px] transition-colors ${
+                        newBillForm.billType === type
+                          ? 'bg-[var(--brand)] text-white'
+                          : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--brand)]'
+                      }`}
+                    >{type}</button>
+                  ))}
+                </div>
+              </div>
               <div>
                 <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">关联订单 <span className="text-[var(--danger)]">*</span></div>
                 <select
@@ -1827,21 +1846,31 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                 </select>
               </div>
               <div>
-                <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">账单类型 <span className="text-[var(--danger)]">*</span></div>
-                <div className="flex gap-2">
-                  {['阶段账单', '尾款账单', '整单账单'].map(type => (
-                    <button
-                      key={type}
-                      onClick={() => setNewBillForm(prev => ({ ...prev, billType: type }))}
-                      className={`flex-1 px-3 py-2 rounded-md text-[13px] transition-colors ${
-                        newBillForm.billType === type
-                          ? 'bg-[var(--brand)] text-white'
-                          : 'border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--brand)]'
-                      }`}
-                    >{type}</button>
-                  ))}
-                </div>
+                <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">款项性质</div>
+                <select
+                  value={newBillForm.nature}
+                  onChange={e => setNewBillForm(prev => ({ ...prev, nature: e.target.value }))}
+                  className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-md text-[13px] focus:outline-none focus:border-[var(--brand)] bg-white"
+                >
+                  <option value="正常结算">正常结算</option>
+                  <option value="补充结算">补充结算</option>
+                  <option value="合同退款">合同退款</option>
+                  <option value="违约金">违约金</option>
+                  <option value="赔偿金">赔偿金</option>
+                  <option value="终止冲销">终止冲销</option>
+                </select>
               </div>
+              {newBillForm.billType === '调账单' && (
+                <div>
+                  <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">关联原账单编号（可选）</div>
+                  <input
+                    value={newBillForm.relatedBillId}
+                    onChange={e => setNewBillForm(prev => ({ ...prev, relatedBillId: e.target.value }))}
+                    placeholder="如 BL-2026-0001，用于冲销或补充原账单"
+                    className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-md text-[13px] focus:outline-none focus:border-[var(--brand)]"
+                  />
+                </div>
+              )}
               <div>
                 <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">账单金额 <span className="text-[var(--danger)]">*</span></div>
                 <div className="relative">
@@ -1855,10 +1884,29 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                   />
                 </div>
               </div>
+              <div>
+                <div className="text-[12px] text-[var(--text-tertiary)] mb-1.5">创建原因 <span className="text-[var(--danger)]">*</span></div>
+                <textarea
+                  value={newBillForm.reason}
+                  onChange={e => setNewBillForm(prev => ({ ...prev, reason: e.target.value }))}
+                  rows={3}
+                  placeholder="请说明创建此人工账单/调账单的原因和事实依据"
+                  className="w-full px-3 py-2 border border-[var(--border-subtle)] rounded-md text-[13px] focus:outline-none focus:border-[var(--brand)] resize-none"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newBillForm.needsConfirmation}
+                  onChange={e => setNewBillForm(prev => ({ ...prev, needsConfirmation: e.target.checked }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-[12px] text-[var(--text-secondary)]">创建后需客户与用户双方确认（勾选后以草稿状态生成，不勾选则直接生效）</span>
+              </div>
             </div>
-            <div className="flex items-center justify-end gap-3 p-5 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-[var(--border-subtle)] sticky bottom-0 bg-white">
               <button
-                onClick={() => { setCreateBillModal(false); setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '' }); }}
+                onClick={() => { setCreateBillModal(false); setNewBillForm({ orderSelect: '', billType: '阶段账单', amount: '', reason: '终止后人工补单', nature: '正常结算', relatedBillId: '', needsConfirmation: true }); }}
                 className="px-4 py-2 border border-[var(--border-subtle)] text-[var(--text-secondary)] rounded-md text-[13px] hover:bg-[var(--bg-hover)] transition-colors"
               >取消</button>
               <button

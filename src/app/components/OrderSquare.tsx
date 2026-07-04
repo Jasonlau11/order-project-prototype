@@ -869,16 +869,6 @@ export function OrderSquare({
               )}
             </div>
 
-            {/* Search in filter bar — linked to Hero search (P1-10) */}
-            <div className="flex-1 min-w-[200px] max-w-sm flex items-center gap-2 rounded-md px-3 py-1.5 bg-white border" style={{ borderColor: 'var(--border-default)' }}>
-              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--text-tertiary)' }} />
-              <input type="text" placeholder="搜索订单标题、描述..." value={keyword}
-                onChange={e => { setKeyword(e.target.value); setCurrentPage(1); }}
-                className="flex-1 bg-transparent border-none outline-none text-[12px]" style={{ color: 'var(--text-primary)' }}
-              />
-              {keyword && <button onClick={() => { setKeyword(''); setCurrentPage(1); }}><X className="w-3.5 h-3.5" style={{ color: 'var(--text-tertiary)' }} /></button>}
-            </div>
-
             {/* Sort + Filter */}
             <div className="flex items-center gap-2 shrink-0 flex-wrap">
               <div className="flex items-center gap-0 rounded-md overflow-hidden" style={{ border: '1px solid var(--border-default)' }}>

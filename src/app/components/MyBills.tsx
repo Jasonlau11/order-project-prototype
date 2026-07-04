@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft, FileText, Clock, CheckCircle, XCircle, AlertCircle,
   CreditCard, RotateCcw, ChevronRight, X, Upload, Info,
-  TrendingUp, DollarSign, Wallet, ReceiptText, BadgeCheck, Search, Calendar
+  TrendingUp, DollarSign, Wallet, ReceiptText, BadgeCheck, Search, Calendar,
+  PlusCircle, ClipboardCheck
 } from 'lucide-react';
 import { SkeletonTable } from './Skeleton';
 import { EmptyFirstUse } from './EmptyState';
@@ -55,6 +56,22 @@ interface Bill {
   hasAppeal?: boolean;
   appealReason?: string;
   amountLog: AmountChangeLog[];
+}
+
+type AdjustmentDirection = '补充结算' | '退款扣款' | '违约金' | '赔偿金';
+
+type AdjustmentStatus = 'pending_other_confirm' | 'pending_operation_review' | 'converted_to_bill' | 'rejected';
+
+interface AdjustmentRequest {
+  id: string;
+  orderTitle: string;
+  relatedBillId?: string;
+  initiator: 'customer' | 'user';
+  direction: AdjustmentDirection;
+  amount: number;
+  reason: string;
+  status: AdjustmentStatus;
+  createdAt: string;
 }
 
 // ── Mock data ──────────────────────────────────────────────────────────────
@@ -1053,6 +1070,21 @@ interface MyBillsProps {
 
 export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }: MyBillsProps) {
   const [bills, setBills] = useState<Bill[]>(mockBills);
+  const [adjustmentRequests, setAdjustmentRequests] = useState<AdjustmentRequest[]>([
+    {
+      id: 'ADJ-2026-0001',
+      orderTitle: '电商平台后端开发',
+      relatedBillId: 'BL-2026-0005',
+      initiator: 'customer',
+      direction: '退款扣款',
+      amount: 15000,
+      reason: '里程碑 2 部分功能未完成，申请退还阶段款项。',
+      status: 'pending_operation_review',
+      createdAt: '2026-04-06',
+    },
+  ]);
+  const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
+  const [adjustmentForm, setAdjustmentForm] = useState({ orderTitle: '', relatedBillId: '', direction: '补充结算' as AdjustmentDirection, amount: '', reason: '' });
   const [activeFilter, setActiveFilter] = useState<BillStatus | 'all'>('all');
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -1215,6 +1247,26 @@ export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }:
     });
   }
 
+  function submitAdjustmentRequest() {
+    const amount = parseFloat(adjustmentForm.amount);
+    if (!adjustmentForm.orderTitle.trim() || !adjustmentForm.reason.trim() || !amount || Number.isNaN(amount)) return;
+    const next: AdjustmentRequest = {
+      id: `ADJ-2026-${String(adjustmentRequests.length + 1).padStart(4, '0')}`,
+      orderTitle: adjustmentForm.orderTitle.trim(),
+      relatedBillId: adjustmentForm.relatedBillId || undefined,
+      initiator: isCustomer ? 'customer' : 'user',
+      direction: adjustmentForm.direction,
+      amount,
+      reason: adjustmentForm.reason.trim(),
+      status: isCustomer ? 'pending_other_confirm' : 'pending_other_confirm',
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+    setAdjustmentRequests(prev => [next, ...prev]);
+    setShowAdjustmentModal(false);
+    setAdjustmentForm({ orderTitle: '', relatedBillId: '', direction: isCustomer ? '退款扣款' : '补充结算', amount: '', reason: '' });
+    showToast(isCustomer ? '调账申请已提交，等待接单方确认或运营介入' : '补充结算申请已提交，等待客户确认或运营审核');
+  }
+
   // Action pill labels for list cards
   function getActionLabel(bill: Bill): string | null {
     if (isUser) {
@@ -1257,6 +1309,17 @@ export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }:
                 {isCustomer ? '我发布的订单 · 应付账单' : '我接单的订单 · 应收账单'}
               </p>
             </div>
+            <button
+              onClick={() => {
+                setAdjustmentForm({ orderTitle: '', relatedBillId: '', direction: isCustomer ? '退款扣款' : '补充结算', amount: '', reason: '' });
+                setShowAdjustmentModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-[13px] font-medium text-white transition-colors"
+              style={{ backgroundColor: 'var(--brand)' }}
+            >
+              <PlusCircle className="w-4 h-4" />
+              {isCustomer ? '发起退款/扣款申请' : '发起补充结算申请'}
+            </button>
           </div>
         </div>
       </div>
@@ -1408,6 +1471,40 @@ export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }:
             </button>
           ))}
         </div>
+
+        {/* Adjustment requests */}
+        {adjustmentRequests.length > 0 && (
+          <div className="bg-white rounded-md shadow-[var(--shadow-card)] border border-[var(--border-subtle)] mb-4 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-root)]">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4" style={{ color: 'var(--brand)' }} />
+                <span className="text-sm font-medium text-[var(--text-primary)]">调账 / 补充结算申请</span>
+              </div>
+              <span className="text-xs text-[var(--text-tertiary)]">用于补款、扣款、退款、违约金、赔偿金等非标准出账场景</span>
+            </div>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {adjustmentRequests.map(req => (
+                <div key={req.id} className="px-4 py-3 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13px] font-medium text-[var(--text-primary)]">{req.id}</span>
+                      <span className="px-2 py-0.5 rounded text-[11px] bg-[var(--brand-subtle)] text-[var(--brand)]">{req.direction}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--warning-bg)] text-[var(--warning)]">
+                        {req.status === 'pending_other_confirm' ? '待对方确认' : req.status === 'pending_operation_review' ? '待运营审核' : req.status === 'converted_to_bill' ? '已转账单' : '已驳回'}
+                      </span>
+                    </div>
+                    <div className="text-[12px] mt-1 text-[var(--text-secondary)]">{req.orderTitle}{req.relatedBillId ? ` · 关联 ${req.relatedBillId}` : ''}</div>
+                    <div className="text-[12px] mt-1 text-[var(--text-tertiary)] leading-relaxed">{req.reason}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[16px] font-semibold" style={{ color: req.direction === '补充结算' ? 'var(--brand)' : 'var(--danger)' }}>¥{req.amount.toLocaleString()}</div>
+                    <div className="text-[11px] mt-1 text-[var(--text-tertiary)]">{req.createdAt}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bill list */}
         {isLoading ? (
@@ -1600,6 +1697,106 @@ export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }:
           onClose={() => setSelectedBill(null)}
           onAction={handleAction}
         />
+      )}
+
+      {/* Adjustment request modal */}
+      {showAdjustmentModal && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-md shadow-[var(--shadow-modal)] w-full max-w-lg mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-base font-semibold text-[var(--text-primary)]">
+                  {isCustomer ? '发起退款/扣款/赔偿申请' : '发起补充结算申请'}
+                </div>
+                <div className="text-xs text-[var(--text-tertiary)] mt-1">
+                  该申请不会直接生成正式账单，需对方确认或运营审核后转为人工账单/调账单。
+                </div>
+              </div>
+              <button onClick={() => setShowAdjustmentModal(false)} className="p-1 rounded hover:bg-[var(--bg-root)]">
+                <X className="w-4 h-4 text-[var(--text-tertiary)]" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] block mb-1">关联订单</label>
+                <input
+                  value={adjustmentForm.orderTitle}
+                  onChange={e => setAdjustmentForm(prev => ({ ...prev, orderTitle: e.target.value }))}
+                  placeholder="请输入订单标题或编号"
+                  className="w-full px-3 py-2 border border-[var(--border-default)] rounded-md text-sm focus:outline-none focus:border-[var(--brand)]"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] block mb-1">关联账单编号（可选）</label>
+                <input
+                  value={adjustmentForm.relatedBillId}
+                  onChange={e => setAdjustmentForm(prev => ({ ...prev, relatedBillId: e.target.value }))}
+                  placeholder="如 BL-2026-0001"
+                  className="w-full px-3 py-2 border border-[var(--border-default)] rounded-md text-sm focus:outline-none focus:border-[var(--brand)]"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] block mb-1">调账类型</label>
+                <select
+                  value={adjustmentForm.direction}
+                  onChange={e => setAdjustmentForm(prev => ({ ...prev, direction: e.target.value as AdjustmentDirection }))}
+                  className="w-full px-3 py-2 border border-[var(--border-default)] rounded-md text-sm focus:outline-none focus:border-[var(--brand)] bg-white"
+                >
+                  {isCustomer ? (
+                    <>
+                      <option value="退款扣款">退款扣款</option>
+                      <option value="违约金">违约金</option>
+                      <option value="赔偿金">赔偿金</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="补充结算">补充结算（补款）</option>
+                      <option value="违约金">违约金（对方违约）</option>
+                      <option value="赔偿金">赔偿金</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] block mb-1">金额（元）</label>
+                <input
+                  type="number"
+                  value={adjustmentForm.amount}
+                  onChange={e => setAdjustmentForm(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="请输入金额"
+                  className="w-full px-3 py-2 border border-[var(--border-default)] rounded-md text-sm focus:outline-none focus:border-[var(--brand)]"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] block mb-1">申请说明</label>
+                <textarea
+                  value={adjustmentForm.reason}
+                  onChange={e => setAdjustmentForm(prev => ({ ...prev, reason: e.target.value }))}
+                  rows={3}
+                  placeholder="请详细说明调账原因、事实依据及双方协商情况"
+                  className="w-full px-3 py-2 border border-[var(--border-default)] rounded-md text-sm focus:outline-none focus:border-[var(--brand)] resize-none"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setShowAdjustmentModal(false)}
+                  className="flex-1 py-2.5 rounded-md border border-[var(--border-default)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-root)] transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={submitAdjustmentRequest}
+                  disabled={!adjustmentForm.orderTitle.trim() || !adjustmentForm.reason.trim() || !adjustmentForm.amount}
+                  className="flex-1 py-2.5 rounded-md text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: 'var(--brand)' }}
+                >
+                  提交申请
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* P2: Queued Toast */}
