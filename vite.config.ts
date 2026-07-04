@@ -34,9 +34,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'motion': ['framer-motion'],
-          'vendor-react': ['react', 'react-dom'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('framer-motion') || id.includes('motion')) return 'motion';
+          if (id.includes('lucide-react')) return 'vendor-icons';
+          if (id.includes('react-markdown') || id.includes('remark') || id.includes('micromark') || id.includes('unified')) return 'vendor-markdown';
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
         },
       },
     },

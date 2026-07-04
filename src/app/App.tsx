@@ -1,23 +1,23 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { OrderSquare } from './components/OrderSquare';
-import { CustomerWorkbench } from './components/CustomerWorkbench';
-import { OrderPublishPage } from './components/OrderPublishPage';
+const OrderSquare = lazy(() => import('./components/OrderSquare').then(m => ({ default: m.OrderSquare })));
+const CustomerWorkbench = lazy(() => import('./components/CustomerWorkbench').then(m => ({ default: m.CustomerWorkbench })));
+const OrderPublishPage = lazy(() => import('./components/OrderPublishPage').then(m => ({ default: m.OrderPublishPage })));
 const MyOrders = lazy(() => import('./components/MyOrders').then(m => ({ default: m.MyOrders })));
 const OperationDashboard = lazy(() => import('./components/OperationDashboard').then(m => ({ default: m.OperationDashboard })));
-import { DevToolConfig } from './components/DevToolConfig';
-import { AgreementTemplateConfig } from './components/AgreementTemplateConfig';
+const DevToolConfig = lazy(() => import('./components/DevToolConfig').then(m => ({ default: m.DevToolConfig })));
+const AgreementTemplateConfig = lazy(() => import('./components/AgreementTemplateConfig').then(m => ({ default: m.AgreementTemplateConfig })));
+const PersonalInfo = lazy(() => import('./components/PersonalInfo').then(m => ({ default: m.PersonalInfo })));
+const AccountSecurity = lazy(() => import('./components/AccountSecurity').then(m => ({ default: m.AccountSecurity })));
+const CustomerQualification = lazy(() => import('./components/CustomerQualification').then(m => ({ default: m.CustomerQualification })));
+const UserQualification = lazy(() => import('./components/UserQualification').then(m => ({ default: m.UserQualification })));
+const MessageCenter = lazy(() => import('./components/MessageCenter').then(m => ({ default: m.MessageCenter })));
+const MyBills = lazy(() => import('./components/MyBills').then(m => ({ default: m.MyBills })));
+const OperationConfigPage = lazy(() => import('./components/OperationConfigPage').then(m => ({ default: m.OperationConfigPage })));
+const AdminRegistration = lazy(() => import('./components/AdminRegistration').then(m => ({ default: m.AdminRegistration })));
 import { AuthModal } from './components/AuthModal';
 import { GlobalNav } from './components/GlobalNav';
-import { PersonalInfo } from './components/PersonalInfo';
-import { AccountSecurity } from './components/AccountSecurity';
-import { CustomerQualification } from './components/CustomerQualification';
-import { UserQualification } from './components/UserQualification';
-import { MessageCenter } from './components/MessageCenter';
-import { MyBills } from './components/MyBills';
-import { OperationConfigPage } from './components/OperationConfigPage';
 import { AdminEntrance } from './components/AdminEntrance';
-import { AdminRegistration } from './components/AdminRegistration';
 import { ToastContainer } from './components/Toast';
 
 type UserRole = 'first-visit' | 'customer' | 'user' | 'browse-only' | 'admin';
@@ -53,6 +53,15 @@ const MOCK_USER_CERT_DATA = {
 };
 const MOCK_USER_CERT_REJECT_REASON =
   '能力背景介绍过于简单，仅描述了技术方向但未提供具体项目经验。请补充至少 3 个完整项目案例（含项目规模、技术栈、您的角色及成果），并提供可验证的资质证书信息后重新提交。';
+
+const PageFallback = () => (
+  <div className="flex-1 flex items-center justify-center">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--border-subtle)', borderTopColor: 'var(--brand)' }} />
+      <div className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>加载中...</div>
+    </div>
+  </div>
+);
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('order');
@@ -226,6 +235,7 @@ export default function App() {
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
         >
+        <Suspense fallback={<PageFallback />}>
         {currentPage === 'order' && (
           userRole === 'customer' ? (
             <CustomerWorkbench
@@ -259,13 +269,11 @@ export default function App() {
           <OrderPublishPage onBack={() => setCurrentPage('order')} />
         )}
         {currentPage === 'myOrders' && (
-          <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="flex flex-col items-center gap-3"><div className="w-8 h-8 rounded-full border-2 animate-spin" style={{borderColor:'var(--border-subtle)',borderTopColor:'var(--brand)'}}/><div className="text-[13px]" style={{color:'var(--text-tertiary)'}}>加载中...</div></div></div>}>
           <MyOrders
             userRole={userRole}
             setUserRole={handleSetUserRole}
             onBack={() => setCurrentPage('order')}
           />
-          </Suspense>
         )}
         {currentPage === 'myBills' && (
           <MyBills userRole={userRole} onBack={() => setCurrentPage('order')} onNavigateToMyOrders={handleNavigateToMyOrders} />
@@ -322,9 +330,7 @@ export default function App() {
           />
         )}
         {currentPage === 'operation-dashboard' && (
-          <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="flex flex-col items-center gap-3"><div className="w-8 h-8 rounded-full border-2 animate-spin" style={{borderColor:'var(--border-subtle)',borderTopColor:'var(--brand)'}}/><div className="text-[13px]" style={{color:'var(--text-tertiary)'}}>加载中...</div></div></div>}>
           <OperationDashboard onNavigate={setCurrentPage} />
-          </Suspense>
         )}
         {currentPage === 'dev-tool-config' && (
           <DevToolConfig onNavigate={setCurrentPage} />
@@ -338,6 +344,7 @@ export default function App() {
         {currentPage === 'adminRegistration' && (
           <AdminRegistration onNavigate={setCurrentPage} />
         )}
+        </Suspense>
         </motion.div>
       </AnimatePresence>
     </div>
