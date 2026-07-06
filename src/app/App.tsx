@@ -2,6 +2,7 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 const OrderSquare = lazy(() => import('./components/OrderSquare').then(m => ({ default: m.OrderSquare })));
 const CustomerWorkbench = lazy(() => import('./components/CustomerWorkbench').then(m => ({ default: m.CustomerWorkbench })));
+const DialogueWorkbench = lazy(() => import('./components/DialogueWorkbench').then(m => ({ default: m.DialogueWorkbench })));
 const OrderPublishPage = lazy(() => import('./components/OrderPublishPage').then(m => ({ default: m.OrderPublishPage })));
 const MyOrders = lazy(() => import('./components/MyOrders').then(m => ({ default: m.MyOrders })));
 const OperationDashboard = lazy(() => import('./components/OperationDashboard').then(m => ({ default: m.OperationDashboard })));
@@ -238,7 +239,7 @@ export default function App() {
         <Suspense fallback={<PageFallback />}>
         {currentPage === 'order' && (
           userRole === 'customer' ? (
-            <CustomerWorkbench
+            <DialogueWorkbench
               userRole={userRole}
               setUserRole={handleSetUserRole}
               setCurrentPage={setCurrentPage}
