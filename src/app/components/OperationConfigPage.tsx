@@ -335,6 +335,9 @@ function TaskTypeManager() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [inlineDrafts, setInlineDrafts] = useState<Record<string, { name: string; code: string; features: string; aiGuidance: string }>>({});
+  const [customModuleEditor, setCustomModuleEditor] = useState<{ typeId: string; originalName?: string } | null>(null);
+  const [customModuleName, setCustomModuleName] = useState('');
+  const [moduleSaveFeedback, setModuleSaveFeedback] = useState<string | null>(null);
   const pageSize = 15;
 
   const flatTypes = useMemo(() => flattenTypes(taskTypes), [taskTypes]);
@@ -447,6 +450,40 @@ function TaskTypeManager() {
     const type = flatTypes.find(t => t.id === typeId);
     if (!type) return;
     updateTypeModules(typeId, type.skeletonModules.filter(m => m !== mod));
+  };
+
+  const showModuleFeedback = (message: string) => {
+    setModuleSaveFeedback(message);
+    window.setTimeout(() => setModuleSaveFeedback(null), 1800);
+  };
+
+  const openCustomModuleEditor = (typeId: string, originalName?: string) => {
+    setCustomModuleEditor({ typeId, originalName });
+    setCustomModuleName(originalName || '');
+  };
+
+  const saveCustomModule = () => {
+    if (!customModuleEditor) return;
+    const name = customModuleName.trim();
+    const type = flatTypes.find(t => t.id === customModuleEditor.typeId);
+    if (!name || !type) return;
+    const duplicate = type.skeletonModules.some(mod => mod === name && mod !== customModuleEditor.originalName);
+    if (duplicate) return;
+
+    if (customModuleEditor.originalName) {
+      updateTypeModules(customModuleEditor.typeId, type.skeletonModules.map(mod => mod === customModuleEditor.originalName ? name : mod));
+      showModuleFeedback(`自定义模块“${name}”已更新`);
+    } else {
+      updateTypeModules(customModuleEditor.typeId, [...type.skeletonModules, name]);
+      showModuleFeedback(`自定义模块“${name}”已添加`);
+    }
+    setCustomModuleEditor(null);
+    setCustomModuleName('');
+  };
+
+  const removeCustomModule = (typeId: string, mod: string) => {
+    removeModule(typeId, mod);
+    showModuleFeedback(`自定义模块“${mod}”已移除`);
   };
 
   const handleSkeletonDragStart = (e: React.DragEvent, moduleIndex: number) => {
@@ -716,7 +753,7 @@ function TaskTypeManager() {
                     </div>
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                      <span className="flex items-center gap-1"><Layers className="w-[12px] h-[12px]" />已选 {type.skeletonModules.length}/{SKELETON_MODULES.length} 模块</span>
+                      <span className="flex items-center gap-1"><Layers className="w-[12px] h-[12px]" />共 {type.skeletonModules.length} 个模块</span>
                       <span className="text-[11px]">{type.createdAt}</span>
                     </div>
                     {/* Toggle */}
@@ -810,6 +847,7 @@ function TaskTypeManager() {
                           {type.skeletonModules.map((mod, idx) => {
                             const isDragging = dragModuleIndex === idx;
                             const isDropTarget = dropTargetIndex === idx;
+                            const isCustomModule = !SKELETON_MODULES.includes(mod);
                             return (
                               <div
                                 key={`${type.id}-${mod}`}
@@ -828,13 +866,36 @@ function TaskTypeManager() {
                                   transition: 'all var(--transition-fast)',
                                 }}>
                                 <GripVertical className="w-3 h-3 shrink-0" style={{ color: 'var(--text-disabled)' }} />
-                                <input
-                                  type="checkbox"
-                                  checked
-                                  onChange={(e) => { e.stopPropagation(); removeModule(type.id, mod); }}
-                                  className="w-3 h-3 accent-[var(--brand)]"
-                                />
-                                {mod}
+                                {!isCustomModule && (
+                                  <input
+                                    type="checkbox"
+                                    checked
+                                    onChange={(e) => { e.stopPropagation(); removeModule(type.id, mod); }}
+                                    className="w-3 h-3 accent-[var(--brand)]"
+                                  />
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isCustomModule) openCustomModuleEditor(type.id, mod);
+                                  }}
+                                  className={isCustomModule ? 'cursor-text' : 'cursor-move'}
+                                  title={isCustomModule ? '点击修改模块名称' : undefined}>
+                                  {mod}
+                                </button>
+                                {isCustomModule && (
+                                  <>
+                                    <span className="text-[9px] font-medium" style={{ color: 'var(--brand)' }}>自定义</span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); removeCustomModule(type.id, mod); }}
+                                      className="ml-0.5 rounded-sm transition-all hover:bg-[var(--danger-bg)]"
+                                      title="移除自定义模块">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             );
                           })}
@@ -843,22 +904,32 @@ function TaskTypeManager() {
                         <div className="text-[12px] mb-2" style={{ color: 'var(--text-disabled)' }}>暂未选择模块</div>
                       )}
 
-                      {/* Unselected modules */}
-                      {unselectedModules.length > 0 && (
-                        <div className="mb-3 flex items-center gap-2 flex-wrap">
-                          <span className="text-[11px] shrink-0" style={{ color: 'var(--text-tertiary)' }}>可添加：</span>
-                          {unselectedModules.map(mod => (
-                            <button
-                              key={`add-${type.id}-${mod}`}
-                              onClick={(e) => { e.stopPropagation(); addModule(type.id, mod); }}
-                              className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium cursor-pointer transition-all"
-                              style={{ color: 'var(--text-tertiary)', backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border-subtle)' }}>
-                              <Plus className="w-2.5 h-2.5" />
-                              {mod}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      {/* Unselected + custom modules */}
+                      <div className="mb-3 flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] shrink-0" style={{ color: 'var(--text-tertiary)' }}>可添加：</span>
+                        {unselectedModules.map(mod => (
+                          <button
+                            key={`add-${type.id}-${mod}`}
+                            onClick={(e) => { e.stopPropagation(); addModule(type.id, mod); }}
+                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium cursor-pointer transition-all"
+                            style={{ color: 'var(--text-tertiary)', backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border-subtle)' }}>
+                            <Plus className="w-2.5 h-2.5" />
+                            {mod}
+                          </button>
+                        ))}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openCustomModuleEditor(type.id); }}
+                          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-medium cursor-pointer transition-all"
+                          style={{ color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)', border: '1px dashed var(--brand-ring)' }}>
+                          <Plus className="w-2.5 h-2.5" />
+                          自定义模块
+                        </button>
+                        {moduleSaveFeedback && expandedTypeId === type.id && (
+                          <span className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--success)' }}>
+                            <CheckCircle className="w-3 h-3" />{moduleSaveFeedback}
+                          </span>
+                        )}
+                      </div>
 
                       {/* AI guidance — inline editable */}
                       <div>
@@ -919,6 +990,65 @@ function TaskTypeManager() {
           onClose={() => { setShowEditor(false); setEditorType(null); }}
         />
       )}
+
+      {/* Custom Module Editor */}
+      {customModuleEditor && (() => {
+        const targetType = flatTypes.find(t => t.id === customModuleEditor.typeId);
+        const normalizedName = customModuleName.trim();
+        const hasDuplicate = Boolean(targetType?.skeletonModules.some(mod => mod === normalizedName && mod !== customModuleEditor.originalName));
+        const canSave = normalizedName.length > 0 && normalizedName.length <= 20 && !hasDuplicate;
+        return (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-[18vh]" style={{ background: 'rgba(13,17,23,0.25)', backdropFilter: 'blur(4px)' }} onClick={() => setCustomModuleEditor(null)}>
+            <div className="bg-white rounded-md w-full max-w-sm mx-4" style={{ border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-modal)' }} onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div>
+                  <h2 className="text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {customModuleEditor.originalName ? '编辑自定义模块' : '新增自定义模块'}
+                  </h2>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>当前任务类型：{targetType?.name}</p>
+                </div>
+                <button onClick={() => setCustomModuleEditor(null)} className="p-1 rounded-md hover:bg-[var(--bg-hover)]" style={{ color: 'var(--text-tertiary)' }}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="px-5 py-4">
+                <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>模块名称</label>
+                <input
+                  autoFocus
+                  value={customModuleName}
+                  maxLength={20}
+                  onChange={e => setCustomModuleName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && canSave) saveCustomModule();
+                    if (e.key === 'Escape') setCustomModuleEditor(null);
+                  }}
+                  placeholder="如：技术方案要求"
+                  className="w-full px-3 py-2 rounded-md text-[13px] outline-none bg-white"
+                  style={{ border: `1px solid ${hasDuplicate ? 'var(--danger)' : 'var(--border-default)'}`, color: 'var(--text-primary)' }}
+                />
+                <div className="flex items-center justify-between mt-1.5 text-[10px]">
+                  <span style={{ color: hasDuplicate ? 'var(--danger)' : 'var(--text-tertiary)' }}>
+                    {hasDuplicate ? '当前骨架中已存在同名模块' : '添加后可继续拖拽调整展示顺序'}
+                  </span>
+                  <span style={{ color: 'var(--text-disabled)' }}>{customModuleName.length}/20</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 px-5 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <button onClick={() => setCustomModuleEditor(null)}
+                  className="px-4 py-2 rounded-md text-[13px] font-medium"
+                  style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}>
+                  取消
+                </button>
+                <button onClick={saveCustomModule} disabled={!canSave}
+                  className="px-4 py-2 rounded-md text-[13px] font-semibold text-white transition-all"
+                  style={{ backgroundColor: canSave ? 'var(--brand)' : 'var(--text-disabled)', cursor: canSave ? 'pointer' : 'not-allowed' }}>
+                  {customModuleEditor.originalName ? '保存修改' : '添加模块'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && deleteTargetInfo && (
