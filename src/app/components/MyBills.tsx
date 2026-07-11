@@ -1803,7 +1803,7 @@ export function MyBills({ userRole = 'customer', onBack, onNavigateToMyOrders }:
       {activeToast && (
         <div
           className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-md text-white text-sm shadow-xl"
-          style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 55%, #12103d 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 55%, #27130D 100%)' }}
         >
           {activeToast}
           {toastQueue.length > 1 && (

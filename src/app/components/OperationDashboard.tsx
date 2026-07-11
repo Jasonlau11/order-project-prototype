@@ -447,9 +447,9 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
     pending:  { label: '认证中', color: 'bg-[#fff8e1] text-[#f57c00]' },
     rejected: { label: '已驳回', color: 'bg-red-50 text-red-700' },
     pending_review: { label: '待审核', color: 'bg-[#fff8e1] text-[#f57c00]' },
-    promoting: { label: '推广中', color: 'bg-[#e7f5ff] text-[#0066cc]' },
+    promoting: { label: '推广中', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
     signing: { label: '协议签署中', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
-    in_progress: { label: '交付中', color: 'bg-[#e3f2fd] text-[#1976d2]' },
+    in_progress: { label: '交付中', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
     accepted: { label: '已验收', color: 'bg-[var(--success-bg)] text-[var(--success)]' },
     pending_settlement:   { label: '待结算',       color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
     pending_reconciliation: { label: '待对账',     color: 'bg-[#fff8e1] text-[#f57c00]' },
@@ -585,11 +585,11 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
           </div>
 
           {/* ── P1-02: 30分钟自动刷新条 ── */}
-          <div className="flex items-center justify-between mb-6 p-3 bg-[#e7f5ff] rounded-lg border border-[#b3d8ff]">
+          <div className="flex items-center justify-between mb-6 p-3 bg-[var(--brand-subtle)] rounded-lg border border-[var(--brand-ring)]">
             <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 text-[#0066cc]" />
+              <Clock className="w-4 h-4 text-[var(--brand)]" />
               <span className="text-[13px] text-[var(--text-secondary)]">下次刷新：</span>
-              <span className="text-[14px] font-semibold text-[#0066cc] tabular-nums">{countdown}</span>
+              <span className="text-[14px] font-semibold text-[var(--brand)] tabular-nums">{countdown}</span>
               <span className="text-[12px] text-[var(--text-tertiary)]">（每30分钟自动刷新）</span>
             </div>
             <button
@@ -1756,7 +1756,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                       </div>
                       <div className="flex items-center gap-6 mb-3">
                         <div className="flex items-center gap-1">
-                          <Award className="w-4 h-4 text-[#0066cc]" />
+                          <Award className="w-4 h-4 text-[var(--brand)]" />
                           <span className="text-sm font-medium text-[var(--text-primary)]">{user.completedProjects}</span>
                           <span className="text-sm text-[var(--text-tertiary)]">完成项目</span>
                         </div>
@@ -1767,7 +1767,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
                       </div>
                       <div className="flex items-center gap-2 flex-wrap mb-3">
                         {user.skills.map((skill, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-[#e7f5ff] text-[#0066cc] text-xs rounded-full">{skill}</span>
+                          <span key={idx} className="px-3 py-1 bg-[var(--brand-subtle)] text-[var(--brand)] text-xs rounded-full">{skill}</span>
                         ))}
                       </div>
                       <div className="flex items-start gap-2 mb-3">

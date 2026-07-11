@@ -331,7 +331,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
         {/* 头部 — 深色极光风格 */}
         <div
           className="relative px-8 pt-8 pb-7 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 55%, #12103d 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 55%, #27130D 100%)' }}
         >
           {/* Mini aurora orbs */}
           <div

@@ -686,8 +686,8 @@ export function OrderSquareDetail({ isOpen, onClose, userRole, orderData }: Orde
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-blue-50">
-                      <Calendar className="w-4 h-4 text-blue-500" />
+                    <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-[var(--brand-subtle)]">
+                      <Calendar className="w-4 h-4 text-[var(--brand)]" />
                     </div>
                     <div>
                       <div className="text-xs text-[var(--text-tertiary)] mb-0.5">截止时间</div>
@@ -1155,11 +1155,11 @@ export function OrderSquareDetail({ isOpen, onClose, userRole, orderData }: Orde
 
                 {/* 客户视角提示 */}
                 {userRole === 'customer' && (
-                  <div className="bg-blue-50 border-l-4 border-blue-400 rounded-md p-4">
+                  <div className="bg-[var(--brand-subtle)] border-l-4 border-[var(--brand)] rounded-md p-4">
                     <div className="flex items-start gap-2">
-                      <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-[var(--brand)] mt-0.5" />
                       <div>
-                        <div className="text-sm text-blue-700 mb-1">客户视角</div>
+                        <div className="text-sm text-[var(--brand)] mb-1">客户视角</div>
                         <div className="text-sm text-blue-600/80">
                           您当前为客户身份，可以查看订单详情，但无法报名承接订单。
                         </div>

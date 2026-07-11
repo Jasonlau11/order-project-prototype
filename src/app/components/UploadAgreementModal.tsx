@@ -832,7 +832,7 @@ ${paymentTerms}
                 </div>
                 <span className="text-[var(--text-disabled)]">→</span>
                 <div className="flex items-center gap-1">
-                  <div className="w-6 h-6 bg-[#0066cc] text-white rounded-full flex items-center justify-center text-xs">
+                  <div className="w-6 h-6 bg-[var(--brand)] text-white rounded-full flex items-center justify-center text-xs">
                     2
                   </div>
                   <span>接单方确认</span>
