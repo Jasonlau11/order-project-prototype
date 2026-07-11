@@ -359,14 +359,14 @@ export function CustomerQualification({
     <div className="min-h-full bg-[var(--bg-root)] flex flex-col">
 
       {/* ── Mini hero banner ─────────────────────────────────────────── */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 55%, #12103d 100%)' }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 55%, #27130D 100%)' }}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(82,96,240,0.42) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(255,106,61,0.42) 0%, transparent 70%)' }} />
           <div className="absolute -top-8 -left-16 w-60 h-60 rounded-full blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.34) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(255,139,92,0.34) 0%, transparent 70%)' }} />
           <div className="absolute -bottom-12 right-1/3 w-48 h-48 rounded-full blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(255,184,140,0.18) 0%, transparent 70%)' }} />
           <div className="absolute inset-0" style={{
             backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
@@ -384,7 +384,7 @@ export function CustomerQualification({
           )}
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0"
-              style={{ backgroundColor: 'rgba(82,96,240,0.25)' }}>
+              style={{ backgroundColor: 'rgba(255,106,61,0.25)' }}>
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -718,7 +718,7 @@ export function CustomerQualification({
             <button
               onClick={handleSubmit}
               className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
             >
               {certStatus === 'rejected' ? '重新提交资质审核' : '提交资质认证申请'}
             </button>

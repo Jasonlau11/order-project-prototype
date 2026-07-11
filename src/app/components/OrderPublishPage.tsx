@@ -797,7 +797,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
                     <button
                       onClick={() => handleRegenerateCard(card.key)}
                       disabled={regeneratingCard === card.key}
-                      className="text-xs text-[#7c5cf0] hover:text-[#6a4ce0] disabled:opacity-50 flex items-center gap-1"
+                      className="text-xs text-[#FF6A3D] hover:text-[#D9471D] disabled:opacity-50 flex items-center gap-1"
                     >
                       <RefreshCw className={`w-3 h-3 ${regeneratingCard === card.key ? 'animate-spin' : ''}`} />
                       重新生成
@@ -848,7 +848,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
                   [&_ul]:my-1.5 [&_ul]:pl-5 [&_ul]:list-disc [&_ul]:space-y-0.5
                   [&_ol]:my-1.5 [&_ol]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-0.5
                   [&_li]:text-[#555]
-                  [&_code]:px-1 [&_code]:py-0.5 [&_code]:bg-[#f5f6fa] [&_code]:text-[#7c5cf0] [&_code]:rounded [&_code]:text-[12px]
+                  [&_code]:px-1 [&_code]:py-0.5 [&_code]:bg-[#f5f6fa] [&_code]:text-[#FF6A3D] [&_code]:rounded [&_code]:text-[12px]
                   [&_pre]:bg-[#f5f6fa] [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:text-[12px] [&_pre]:overflow-x-auto [&_pre]:my-2
                   [&_hr]:my-3 [&_hr]:border-[#eee]
                   [&_em]:text-[#888]
@@ -878,7 +878,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
           <button
             onClick={handleCardsConfirmed}
             className="px-8 py-2.5 rounded-full text-sm font-medium text-white transition-colors hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+            style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
           >
             确认内容，继续填写结构化信息
           </button>
@@ -946,12 +946,12 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
                   { value: 'recommended_push', title: '推荐 + 推送', desc: '从AI匹配的优质用户中勾选，也可手动搜索添加用户一并推送', icon: Sparkles, highlight: true },
                   { value: 'open_bidding', title: '公开抢单', desc: '在订单广场展示，供用户报名' },
                 ].map(opt => (
-                  <label key={opt.value} className={`flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer ${acceptMode === opt.value ? (opt.highlight ? 'border-[#7c5cf0] bg-[#f8f6ff]' : 'border-[var(--brand)] bg-[var(--brand-bg)]') : 'border-[#eee]'}`}>
+                  <label key={opt.value} className={`flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer ${acceptMode === opt.value ? (opt.highlight ? 'border-[#FF6A3D] bg-[#FFF4EF]' : 'border-[var(--brand)] bg-[var(--brand-bg)]') : 'border-[#eee]'}`}>
                     <input type="radio" name="accept" value={opt.value} checked={acceptMode === opt.value} onChange={e => setAcceptMode(e.target.value as any)} className="mt-0.5" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-[#222]">{opt.title}</span>
-                        {opt.highlight && <span className="px-1.5 py-0.5 bg-[#7c5cf0] text-white text-xs rounded">推荐</span>}
+                        {opt.highlight && <span className="px-1.5 py-0.5 bg-[#FF6A3D] text-white text-xs rounded">推荐</span>}
                       </div>
                       <div className="text-xs text-[#888] mt-0.5">{opt.desc}</div>
                     </div>
@@ -964,7 +964,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
                 <div className="mt-4 space-y-4">
                   <div className="p-4 bg-[#f8f9ff] rounded-md border border-[#e8eaff]">
                     <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="w-4 h-4 text-[#7c5cf0]" />
+                      <Sparkles className="w-4 h-4 text-[#FF6A3D]" />
                       <span className="text-sm font-medium text-[#333]">AI 匹配的优质用户</span>
                       <span className="text-xs text-[var(--text-tertiary)]">基于订单标签智能匹配</span>
                     </div>
@@ -1190,7 +1190,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
               <Save className="w-4 h-4" />
               保存草稿
             </button>
-            <button onClick={handlePublishConfigConfirmed} className="px-8 py-2.5 rounded-full text-sm font-medium text-white" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}>
+            <button onClick={handlePublishConfigConfirmed} className="px-8 py-2.5 rounded-full text-sm font-medium text-white" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}>
               提交审核
             </button>
           </div>
@@ -1262,7 +1262,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
       {toastMsg && (
         <div className="fixed top-20 right-8 z-50 px-5 py-3 bg-white rounded-lg border border-[#e8eaff] shadow-lg animate-fade-in">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#7c5cf0]" />
+            <Sparkles className="w-4 h-4 text-[#FF6A3D]" />
             <span className="text-sm text-[#333]">{toastMsg}</span>
           </div>
         </div>
@@ -1281,7 +1281,7 @@ export function OrderPublishPage({ onBack }: OrderPublishPageProps) {
             <button
               onClick={handleOpenAIAssistant}
               className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
-              style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 20px rgba(82,96,240,0.45)' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', boxShadow: '0 4px 20px rgba(255,106,61,0.45)' }}
               title="AI 助手"
             >
               <Bot className="w-6 h-6 text-white" />

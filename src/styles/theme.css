@@ -6,18 +6,40 @@
  * 核心：品牌色 <5% / 信任琥珀色 <2% / 95% 灰度构建 / 蓝灰调阴影 / 3档字重 / 8px圆角
  *
  * 颜色体系：
- *   --brand #4255D4  靛蓝（仅 CTA/价格/选中态）
+ *   --brand #F05A2A  CSDN 橙（仅 CTA/价格/选中态）
  *   --trust #B8860B  琥珀金（仅信用分/认证标识）
  *   其余 95% 界面由灰度层级构建
  */
 
 :root {
-  /* ===== 品牌色（靛蓝系）— 界面占比 < 5% ===== */
-  --brand:                #4255D4;
-  --brand-hover:          #3545C0;
-  --brand-pressed:        #2A38A8;
-  --brand-subtle:         #EBEFFA;
-  --brand-ring:           rgba(66,85,212,0.20);
+  /* ===== 品牌色（CSDN 橙系）— 仅用于 CTA/选中态 ===== */
+  --brand:                #F05A2A;
+  --brand-hover:          #D9471D;
+  --brand-pressed:        #B83716;
+  --brand-subtle:         #FFF0EA;
+  --brand-ring:           rgba(240,90,42,0.20);
+
+  /* ===== 市场前台色（CSDN 橙系）— 仅用于前台交易入口 ===== */
+  --market-brand:         #F05A2A;
+  --market-brand-hover:   #D9471D;
+  --market-brand-pressed: #B83716;
+  --market-brand-subtle:  #FFF0EA;
+  --market-brand-soft:    #FFF7F3;
+  --market-brand-ring:    rgba(240,90,42,0.20);
+  --market-hero-bg:       radial-gradient(circle at 50% -20%, rgba(255,106,61,0.16) 0%, rgba(9,9,9,0) 34%), linear-gradient(180deg, #090909 0%, #151515 100%);
+  --market-hero-accent:   #FF6A3D;
+  --market-hero-accent-strong: #FF8A62;
+  --market-hero-accent-soft: rgba(255,106,61,0.14);
+  --market-hero-accent-line: rgba(255,106,61,0.28);
+  --market-hero-text:     #F8FAF7;
+  --market-hero-text-muted: rgba(248,250,247,0.66);
+  --market-hero-text-soft: rgba(248,250,247,0.56);
+  --market-hero-surface:  rgba(255,255,255,0.07);
+  --market-hero-surface-hover: rgba(255,255,255,0.10);
+  --market-hero-border:   rgba(255,255,255,0.12);
+  --market-hero-ink:      #1A0D08;
+  --market-shadow-card:   0 1px 2px rgba(13,17,23,0.04);
+  --market-shadow-hover:  0 10px 28px rgba(13,17,23,0.08);
 
   /* ===== 信任色（琥珀金）— 界面占比 < 2%，仅用于信用信号 ===== */
   --trust:                #B8860B;
@@ -29,7 +51,7 @@
   --bg-subtle:            #EFF1F5;
   --bg-surface:           #FFFFFF;
   --bg-hover:             #F2F4F8;
-  --bg-selected:          #EBF0FA;
+  --bg-selected:          #FFF0EA;
   --bg-hero:              #0D1117;                 /* Hero 深色区 */
 
   /* ===== 文字层级（4 级 + 反色） ===== */
@@ -44,7 +66,7 @@
   --border-subtle:        rgba(13,17,23,0.06);
   --border-default:       rgba(13,17,23,0.10);
   --border-strong:        rgba(13,17,23,0.16);
-  --border-brand:         rgba(66,85,212,0.30);
+  --border-brand:         rgba(240,90,42,0.30);
 
   /* ===== 语义色（4 组，严格收敛） ===== */
   --success:              #0F7B4E;
@@ -101,7 +123,7 @@
   --shadow-card-hover:    0 4px 14px rgba(13,17,23,0.05), 0 2px 6px rgba(13,17,23,0.03);
   --shadow-dropdown:      0 8px 28px rgba(13,17,23,0.06), 0 2px 8px rgba(13,17,23,0.03);
   --shadow-modal:         0 16px 48px rgba(13,17,23,0.08), 0 4px 16px rgba(13,17,23,0.04);
-  --shadow-glow:          0 0 0 3px rgba(66,85,212,0.15);
+  --shadow-glow:          0 0 0 3px rgba(240,90,42,0.15);
 
   /* ===== 圆角系统（3 档 + 全圆） ===== */
   --radius-sm:            6px;
@@ -188,7 +210,7 @@
   --bg-subtle:            #161B22;
   --bg-surface:           #1C2128;
   --bg-hover:             #21262D;
-  --bg-selected:          #1A2440;
+  --bg-selected:          #2A1711;
   --bg-hero:              #090C10;
 
   --text-primary:         #E6EDF3;
@@ -208,7 +230,7 @@
   --foreground:            var(--text-primary);
   --card:                  var(--bg-surface);
   --card-foreground:       var(--text-primary);
-  --primary:               #5B6BE8;
+  --primary:               #FF764B;
   --primary-foreground:    #FFFFFF;
   --secondary:             var(--bg-subtle);
   --secondary-foreground:  var(--text-primary);
@@ -224,7 +246,7 @@
   --switch-background:     rgba(230,237,243,0.16);
   --sidebar:               var(--bg-subtle);
   --sidebar-foreground:    var(--text-primary);
-  --sidebar-primary:       #5B6BE8;
+  --sidebar-primary:       #FF764B;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent:        var(--bg-hover);
   --sidebar-accent-foreground: var(--text-primary);
@@ -263,11 +285,26 @@
   --info-border:         rgba(88,166,255,0.25);
 
   /* ===== 品牌色 — 暗色覆盖 ===== */
-  --brand:               #5B6BE8;
-  --brand-hover:         #4F5DDB;
-  --brand-pressed:       #4350C8;
-  --brand-subtle:        rgba(91,107,232,0.10);
-  --brand-ring:          rgba(91,107,232,0.25);
+  --brand:               #FF764B;
+  --brand-hover:         #FF8A62;
+  --brand-pressed:       #E8582D;
+  --brand-subtle:        rgba(255,118,75,0.12);
+  --brand-ring:          rgba(255,118,75,0.25);
+
+  /* ===== 市场前台色 — 暗色覆盖 ===== */
+  --market-brand:        #FF764B;
+  --market-brand-hover:  #FF8A62;
+  --market-brand-pressed:#E8582D;
+  --market-brand-subtle: rgba(255,118,75,0.12);
+  --market-brand-soft:   rgba(255,118,75,0.08);
+  --market-brand-ring:   rgba(255,118,75,0.25);
+  --market-hero-bg:      radial-gradient(circle at 50% -20%, rgba(255,106,61,0.16) 0%, rgba(9,9,9,0) 34%), linear-gradient(180deg, #090909 0%, #151515 100%);
+  --market-hero-accent:  #FF6A3D;
+  --market-hero-accent-strong: #FF8A62;
+  --market-hero-accent-soft: rgba(255,106,61,0.14);
+  --market-hero-accent-line: rgba(255,106,61,0.28);
+  --market-shadow-card:  0 1px 3px rgba(0,0,0,0.16);
+  --market-shadow-hover: 0 10px 28px rgba(0,0,0,0.24);
 
   /* ===== 信任色 — 暗色覆盖 ===== */
   --trust:               #D4A72C;
@@ -275,7 +312,7 @@
   --trust-border:        rgba(212,167,44,0.25);
 
   /* ===== 边框 — 暗色覆盖（补充） ===== */
-  --border-brand:        rgba(91,107,232,0.35);
+  --border-brand:        rgba(255,118,75,0.35);
 
   /* ===== 反色文字 — 暗色覆盖 ===== */
   --text-inverse:        #0D1117;
@@ -287,7 +324,7 @@
 
   /* ===== 阴影 — 暗色覆盖（补充） ===== */
   --shadow-dropdown:     0 8px 28px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
-  --shadow-glow:         0 0 0 3px rgba(91,107,232,0.20);
+  --shadow-glow:         0 0 0 3px rgba(255,118,75,0.20);
 
   /* ===== shadcn/ui — 暗色覆盖（补充） ===== */
   --popover:             var(--bg-surface);
@@ -362,5 +399,146 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
 }
+.order-square-theme {
+  --market-brand: #F05A2A;
+  --market-brand-hover: #D9471D;
+  --market-brand-pressed: #B83716;
+  --market-brand-subtle: #FFF0EA;
+  --market-brand-soft: #FFF7F3;
+  --market-brand-ring: rgba(240,90,42,0.22);
+}
+
+.order-square-theme.dark {
+  --market-brand: #FF764B;
+  --market-brand-hover: #FF8A62;
+  --market-brand-pressed: #E8582D;
+  --market-brand-subtle: rgba(255,118,75,0.12);
+  --market-brand-soft: rgba(255,118,75,0.08);
+  --market-brand-ring: rgba(255,118,75,0.25);
+}
+
+.market-hero-shell {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.market-hero-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout style paint;
+}
+.market-hero-readability {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(9,9,9,0.18) 0%, rgba(9,9,9,0.045) 40%, transparent 66%),
+    linear-gradient(90deg, rgba(9,9,9,0.10), transparent 22%, transparent 78%, rgba(9,9,9,0.10));
+}
+
+.market-hero-audience-tab {
+  border: 1px solid transparent;
+  color: rgba(248,250,247,0.56);
+  transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.market-hero-audience-tab:hover {
+  color: rgba(248,250,247,0.88);
+  background: rgba(255,255,255,0.055);
+}
+
+.market-hero-audience-tab.is-active {
+  border-color: rgba(255,106,61,0.26);
+  background: rgba(255,106,61,0.11);
+  color: var(--market-hero-accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.market-hero-copy-stage {
+  isolation: isolate;
+}
+
+.market-hero-copy-layer {
+  opacity: 0;
+  visibility: hidden;
+  filter: blur(2px);
+  pointer-events: none;
+  transition:
+    opacity 1000ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 1000ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 1000ms;
+}
+
+.market-hero-copy-layer.is-active {
+  z-index: 1;
+  opacity: 1;
+  visibility: visible;
+  filter: blur(0);
+  pointer-events: auto;
+  transition:
+    opacity 1200ms cubic-bezier(0.4, 0, 0.2, 1) 1180ms,
+    filter 1100ms cubic-bezier(0.4, 0, 0.2, 1) 1180ms,
+    visibility 0s linear 1180ms;
+}
+
+.market-hero-search {
+  border: 1px solid var(--market-hero-border);
+  background: var(--market-hero-surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 16px 40px rgba(0,0,0,0.14);
+  backdrop-filter: blur(16px);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.market-hero-search:focus-within {
+  border-color: rgba(255,106,61,0.46);
+  background: var(--market-hero-surface-hover);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 3px rgba(255,106,61,0.09), 0 18px 44px rgba(0,0,0,0.18);
+}
+
+.market-hero-primary {
+  background: var(--market-hero-accent);
+  color: var(--market-hero-ink);
+  box-shadow: 0 10px 28px rgba(255,106,61,0.16);
+}
+
+.market-hero-primary:hover {
+  background: var(--market-hero-accent-strong);
+  box-shadow: 0 14px 32px rgba(255,106,61,0.22);
+}
+
+.market-hero-secondary {
+  border: 1px solid var(--market-hero-border);
+  background: var(--market-hero-surface);
+  color: rgba(248,250,247,0.88);
+  backdrop-filter: blur(12px);
+}
+
+.market-hero-secondary:hover {
+  border-color: rgba(255,106,61,0.26);
+  background: var(--market-hero-surface-hover);
+}
+
+.market-hero-role-switcher {
+  border: 1px solid var(--market-hero-border);
+  background: var(--market-hero-surface);
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 639px) {
+  .market-hero-readability {
+    background: radial-gradient(ellipse at 50% 40%, rgba(9,9,9,0.38) 0%, rgba(9,9,9,0.16) 54%, transparent 82%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-hero-copy-layer,
+  .market-hero-copy-layer.is-active {
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
 .animate-fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-fade-in-up { animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }

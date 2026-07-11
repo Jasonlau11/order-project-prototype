@@ -336,15 +336,15 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
           {/* Mini aurora orbs */}
           <div
             className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-2xl pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(82,96,240,0.55) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(255,106,61,0.55) 0%, transparent 70%)' }}
           />
           <div
             className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full blur-2xl pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.45) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(255,139,92,0.45) 0%, transparent 70%)' }}
           />
           <div
             className="absolute top-1/2 right-1/3 w-24 h-24 rounded-full blur-xl pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.20) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(255,184,140,0.20) 0%, transparent 70%)' }}
           />
 
           <button
@@ -358,8 +358,8 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
             <div
               className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
               style={{
-                background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)',
-                boxShadow: '0 0 20px rgba(82,96,240,0.6)',
+                background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)',
+                boxShadow: '0 0 20px rgba(255,106,61,0.6)',
               }}
             >
               <Layers className="w-5 h-5 text-white" />
@@ -388,14 +388,14 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                 className={`pb-3 text-sm transition-colors relative ${tab === 'login' ? 'text-[var(--brand)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
               >
                 登录
-                {tab === 'login' && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg, var(--brand), #7c5cf0)' }} />}
+                {tab === 'login' && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg, var(--brand), #FF8A62)' }} />}
               </button>
               <button
                 onClick={() => switchTab('register')}
                 className={`pb-3 text-sm transition-colors relative ${tab === 'register' ? 'text-[var(--brand)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
               >
                 注册
-                {tab === 'register' && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg, var(--brand), #7c5cf0)' }} />}
+                {tab === 'register' && <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg, var(--brand), #FF8A62)' }} />}
               </button>
             </div>
           )}
@@ -434,7 +434,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                             onClick={() => { handleForgotSendCode(); setForgotStep('code'); }}
                             disabled={forgotPhone.length !== 11}
                             className={`w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90 ${forgotPhone.length !== 11 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)' }}
+                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)' }}
                           >
                             获取验证码
                           </button>
@@ -456,7 +456,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                             <button
                               onClick={handleForgotSendCode}
                               disabled={forgotCountdown > 0}
-                              className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${forgotCountdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#e0e4ff]'} transition-colors`}
+                              className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${forgotCountdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#FFE1D5]'} transition-colors`}
                             >
                               {forgotCountdown > 0 ? `${forgotCountdown}s` : '重新发送'}
                             </button>
@@ -465,7 +465,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                           <button
                             onClick={handleForgotVerify}
                             className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
                           >
                             验证
                           </button>
@@ -512,7 +512,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                           <button
                             onClick={handleForgotReset}
                             className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
                           >
                             重置密码
                           </button>
@@ -531,7 +531,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                       <button
                         onClick={closeForgotPassword}
                         className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                        style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                        style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
                       >
                         返回登录
                       </button>
@@ -586,7 +586,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                     <button
                       onClick={handleSendCode}
                       disabled={countdown > 0}
-                      className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${countdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#e0e4ff]'} transition-colors`}
+                      className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${countdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#FFE1D5]'} transition-colors`}
                     >
                       {countdown > 0 ? `${countdown}s` : '获取验证码'}
                     </button>
@@ -595,7 +595,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                   <button
                     onClick={handleSmsLogin}
                     className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                    style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
                   >
                     登录
                   </button>
@@ -633,7 +633,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                     aria-disabled={isLoading ? "true" : undefined}
                     disabled={isLoading}
                     className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                    style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
                   >
                     登录
                   </button>
@@ -839,7 +839,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                     <button
                       onClick={handleSendEmailCode}
                       disabled={emailCountdown > 0}
-                      className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${emailCountdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#e0e4ff]'} transition-colors`}
+                      className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${emailCountdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#FFE1D5]'} transition-colors`}
                     >
                       {emailCountdown > 0 ? `${emailCountdown}s` : '发送验证码'}
                     </button>
@@ -900,7 +900,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setAgreementType('terms'); setShowAgreementModal(true); }}
-                    className="text-[var(--brand)] underline underline-offset-2 hover:text-[#7c5cf0] transition-colors"
+                    className="text-[var(--brand)] underline underline-offset-2 hover:text-[#FF8A62] transition-colors"
                   >
                     《用户服务协议》
                   </button>
@@ -908,7 +908,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setAgreementType('privacy'); setShowAgreementModal(true); }}
-                    className="text-[var(--brand)] underline underline-offset-2 hover:text-[#7c5cf0] transition-colors"
+                    className="text-[var(--brand)] underline underline-offset-2 hover:text-[#FF8A62] transition-colors"
                   >
                     《隐私政策》
                   </button>
@@ -920,7 +920,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                 aria-disabled={isLoading ? "true" : undefined}
                 disabled={isLoading}
                 className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
               >
                 下一步
               </button>
@@ -943,7 +943,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                 <button
                   onClick={handleSendCode}
                   disabled={countdown > 0}
-                  className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${countdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#e0e4ff]'} transition-colors`}
+                  className={`px-4 py-3 rounded-md text-sm whitespace-nowrap ${countdown > 0 ? 'bg-[var(--bg-hover)] text-[var(--text-tertiary)]' : 'bg-[var(--brand-subtle)] text-[var(--brand)] hover:bg-[#FFE1D5]'} transition-colors`}
                 >
                   {countdown > 0 ? `${countdown}s` : '发送验证码'}
                 </button>
@@ -954,7 +954,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
                 aria-disabled={isLoading ? "true" : undefined}
                 disabled={isLoading}
                 className="w-full py-3 text-white rounded-md text-sm transition-opacity hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }}
               >
                 完成注册
               </button>
@@ -993,7 +993,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, onNavigateToAdminRe
               <button
                 onClick={() => setShowAgreementModal(false)}
                 className="w-full py-2.5 text-white rounded-md text-sm hover:opacity-90 transition-opacity"
-                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)' }}
               >
                 我知道了
               </button>

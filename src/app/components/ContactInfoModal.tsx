@@ -55,7 +55,7 @@ export function ContactInfoModal({
 
             {/* 公司名称 */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand)] to-[#7c8aff] flex items-center justify-center text-white font-medium flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand)] to-[#FF9D7E] flex items-center justify-center text-white font-medium flex-shrink-0">
                 {contactInfo.company.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">

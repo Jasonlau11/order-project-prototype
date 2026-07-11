@@ -59,7 +59,7 @@ function DocCard({ label, note, onClick }: { label: string; note?: string; onCli
         <div className="text-[12px] text-[var(--text-primary)]">{label}</div>
         {note && <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{note}</div>}
       </div>
-      <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 group-hover:bg-green-100">已上传</span>
+      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--brand-subtle)] text-[var(--brand)] group-hover:bg-green-100">已上传</span>
       <span className="text-[10px] text-[var(--brand)] opacity-0 group-hover:opacity-100 transition-opacity">点击预览</span>
     </div>
   );
@@ -169,10 +169,10 @@ export function CertReviewModal({
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]"
-          style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 60%, #0a0e28 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 60%, #27130D 100%)' }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-md flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(82,96,240,0.25)', border: '1px solid rgba(82,96,240,0.35)' }}>
+              style={{ backgroundColor: 'rgba(255,106,61,0.25)', border: '1px solid rgba(255,106,61,0.35)' }}>
               {isCustomer
                 ? <Building2 className="w-4.5 h-4.5" style={{ color: 'var(--brand)' }} />
                 : <UserCheck className="w-4.5 h-4.5" style={{ color: 'var(--brand)' }} />}
@@ -207,7 +207,7 @@ export function CertReviewModal({
             <>
               {/* Enterprise info */}
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #7c3aed)' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #FF8A62)' }} />
                 <div className="px-5 py-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Building2 className="w-4 h-4" style={{ color: BRAND }} />
@@ -222,7 +222,7 @@ export function CertReviewModal({
 
               {/* Contact info */}
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #06b6d4, var(--brand))' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #FFB68F, var(--brand))' }} />
                 <div className="px-5 py-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Phone className="w-4 h-4" style={{ color: 'var(--info)' }} />
@@ -239,7 +239,7 @@ export function CertReviewModal({
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
                 <button
                   className="w-full h-[3px]"
-                  style={{ background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }}
+                  style={{ background: 'linear-gradient(90deg, #FF8A62, #FFB68F)' }}
                 />
                 <button
                   onClick={() => setDocsExpanded(!docsExpanded)}
@@ -247,7 +247,7 @@ export function CertReviewModal({
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" style={{ color: 'var(--brand)' }} />
                     <span className="text-[13px] text-[var(--text-primary)]">上传材料</span>
-                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-green-50 text-green-700">3 份已上传</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--brand-subtle)] text-[var(--brand)]">3 份已上传</span>
                   </div>
                   {docsExpanded
                     ? <ChevronUp className="w-4 h-4 text-[var(--text-tertiary)]" />
@@ -269,7 +269,7 @@ export function CertReviewModal({
             <>
               {/* Identity */}
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #7c3aed)' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #FF8A62)' }} />
                 <div className="px-5 py-4">
                   <div className="flex items-center gap-2 mb-3">
                     {userData.isTeam
@@ -295,7 +295,7 @@ export function CertReviewModal({
 
               {/* Capability intro */}
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #FF8A62, #FFB68F)' }} />
                 <div className="px-5 py-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Award className="w-4 h-4" style={{ color: 'var(--brand)' }} />
@@ -309,7 +309,7 @@ export function CertReviewModal({
 
               {/* Qualification certs */}
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #06b6d4, var(--brand))' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, #FFB68F, var(--brand))' }} />
                 <div className="px-5 py-4">
                   <div className="flex items-center gap-2 mb-3">
                     <BadgeCheck className="w-4 h-4" style={{ color: 'var(--info)' }} />

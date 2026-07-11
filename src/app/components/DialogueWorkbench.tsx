@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Send, Paperclip, Sparkles, RefreshCw, ChevronDown, ChevronRight,
   CheckCircle, Clock, FileText, MessageSquare, LayoutGrid, X, Edit3,
-  AlertCircle, Info, Trash2, ArrowRight, Tag,
+  AlertCircle, Info, Trash2, ArrowRight, Tag, Code2, Palette, Video,
+  PenLine, FlaskConical, Megaphone, Cpu, CircleHelp,
 } from 'lucide-react';
 
 interface DialogueWorkbenchProps {
@@ -42,6 +43,8 @@ interface DraftSession {
   rejectReason?: string;
   tags: string[];
   taskTypes: string[];
+  primaryCategory?: string;
+  secondaryCategory?: string;
 }
 
 interface HistoryOrder {
@@ -174,11 +177,14 @@ const MOCK_HISTORY_ORDERS: HistoryOrder[] = [
   },
 ];
 
-const EXAMPLE_PROMPTS = [
-  '我需要一个电商小程序，React技术栈',
-  '品牌VI设计，科技公司',
-  '企业管理系统开发',
-  '短视频内容创作需求',
+const TASK_CATEGORIES = [
+  { id: 'software', label: '软件开发', icon: Code2, children: ['前端开发', '后端开发', '移动端开发', '小程序开发', 'AI应用', '数据开发'] },
+  { id: 'design', label: '平面设计', icon: Palette, children: ['品牌设计', 'UI设计', '海报设计', '包装设计', '插画设计'] },
+  { id: 'video', label: '视频创作', icon: Video, children: ['短视频', '宣传片', '动画制作', '视频剪辑', '直播服务'] },
+  { id: 'writing', label: '文本创作', icon: PenLine, children: ['技术文章', '行业报告', '营销文案', '内容运营', '翻译服务'] },
+  { id: 'review', label: '产品评测', icon: FlaskConical, children: ['软件评测', '硬件评测', '内容测评', '体验报告'] },
+  { id: 'marketing', label: '营销推广', icon: Megaphone, children: ['活动策划', '渠道推广', '品牌传播', '用户增长'] },
+  { id: 'hardware', label: '硬件订单', icon: Cpu, children: ['硬件设计', '嵌入式开发', '设备采购', '安装调试'] },
 ];
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
@@ -258,12 +264,16 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [orderFilter, setOrderFilter] = useState<string>('all');
+  const [selectedPrimaryCategory, setSelectedPrimaryCategory] = useState<string | null>(null);
+  const [selectedSecondaryCategory, setSelectedSecondaryCategory] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const roleSwitcherRef = useRef<HTMLDivElement>(null);
 
   const activeDraft = drafts.find(d => d.id === activeDraftId) || null;
+  const selectedPrimary = TASK_CATEGORIES.find(category => category.id === selectedPrimaryCategory) || null;
+  const isNewDialogueState = !readonlyOrder && (!activeDraft || activeDraft.messages.length === 0);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -297,6 +307,8 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
     setReadonlyOrder(null);
     setShowPreview(false);
     setInputValue('');
+    setSelectedPrimaryCategory(null);
+    setSelectedSecondaryCategory(null);
     inputRef.current?.focus();
   };
 
@@ -317,8 +329,10 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
         completeness: 0,
         messages: [],
         modules: [],
-        tags: [],
-        taskTypes: [],
+        tags: selectedSecondaryCategory ? [selectedSecondaryCategory] : [],
+        taskTypes: selectedPrimary ? [selectedPrimary.label] : [],
+        primaryCategory: selectedPrimary?.label,
+        secondaryCategory: selectedSecondaryCategory || undefined,
       };
       setDrafts(prev => [targetDraft!, ...prev]);
       setActiveDraftId(targetDraft.id);
@@ -326,7 +340,12 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
 
     const userMsg: ChatMessage = { id: newId(), role: 'user', content: text, timestamp: Date.now() };
     const { reply, shouldShowPreview } = generateAIResponse(text, targetDraft);
-    const aiMsg: ChatMessage = { id: newId(), role: 'ai', content: reply, timestamp: Date.now() + 1 };
+    const categoryPath = [selectedPrimary?.label, selectedSecondaryCategory].filter(Boolean).join(' / ');
+    const isFirstMessage = targetDraft.messages.length === 0;
+    const aiReply = isFirstMessage && categoryPath
+      ? `已按「${categoryPath}」方向开始梳理。如果后续描述涉及其他任务类型，我会为您调整分类。\n\n${reply}`
+      : reply;
+    const aiMsg: ChatMessage = { id: newId(), role: 'ai', content: aiReply, timestamp: Date.now() + 1 };
 
     setDrafts(prev => prev.map(d => {
       if (d.id !== targetDraft!.id) return d;
@@ -339,6 +358,10 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
         lastEditTime: Date.now(),
         completeness: newCompleteness,
         modules: d.modules.length === 0 && shouldShowPreview ? generateMockModules() : d.modules,
+        taskTypes: d.taskTypes.length > 0 ? d.taskTypes : selectedPrimary ? [selectedPrimary.label] : [],
+        tags: d.tags.length > 0 ? d.tags : selectedSecondaryCategory ? [selectedSecondaryCategory] : [],
+        primaryCategory: d.primaryCategory || selectedPrimary?.label,
+        secondaryCategory: d.secondaryCategory || selectedSecondaryCategory || undefined,
       };
     }));
 
@@ -597,16 +620,23 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   <span className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
                     {activeDraft ? activeDraft.title : '新对话'}
                   </span>
-                  {activeDraft && (
-                    <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)' }}>
-                      信息收集 {activeDraft.completeness}%
-                    </span>
+                  {activeDraft && activeDraft.messages.length > 0 && (
+                    <>
+                      {(activeDraft.primaryCategory || activeDraft.taskTypes[0]) && (
+                        <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ color: 'var(--text-secondary)', backgroundColor: 'var(--bg-subtle)' }}>
+                          {activeDraft.primaryCategory || activeDraft.taskTypes[0]}{activeDraft.secondaryCategory ? ` / ${activeDraft.secondaryCategory}` : ''}
+                        </span>
+                      )}
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)' }}>
+                        信息收集 {activeDraft.completeness}%
+                      </span>
+                    </>
                   )}
                 </>
               )}
             </div>
             {/* 进度指示器 */}
-            {activeDraft && !readonlyOrder && (
+            {activeDraft && activeDraft.messages.length > 0 && !readonlyOrder && (
               <div className="flex items-center gap-2">
                 <div className="w-32 h-1.5 rounded-full" style={{ backgroundColor: 'var(--bg-subtle)' }}>
                   <div className="h-1.5 rounded-full transition-all duration-300" style={{ width: `${activeDraft.completeness}%`, backgroundColor: 'var(--brand)' }} />
@@ -652,26 +682,150 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                 </div>
               )
             ) : !activeDraft || activeDraft.messages.length === 0 ? (
-              /* 空状态 */
-              <div className="h-full flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: 'var(--brand-subtle)' }}>
-                  <Sparkles className="w-7 h-7" style={{ color: 'var(--brand)' }} />
-                </div>
-                <h2 className="text-[18px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>描述您的需求，AI 帮您生成订单</h2>
-                <p className="text-[13px] mb-6 max-w-md" style={{ color: 'var(--text-tertiary)' }}>
-                  直接在下方输入框用自然语言描述您的项目需求，AI 会通过对话逐步补全订单信息并生成草稿预览
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center max-w-lg">
-                  {EXAMPLE_PROMPTS.map((prompt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInputValue(prompt)}
-                      className="px-3 py-1.5 text-[12px] rounded-lg transition-all hover:-translate-y-px"
-                      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', boxShadow: 'var(--shadow-card)' }}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
+              /* 新对话初始态：分类选择 + 聚焦输入 */
+              <div className="min-h-full flex items-center justify-center px-4 py-10">
+                <div className="w-full max-w-[780px] text-left">
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl" style={{ backgroundColor: 'var(--market-brand-subtle)', color: 'var(--market-brand)' }}>
+                        <Sparkles className="w-4 h-4" />
+                      </span>
+                      <span className="text-[12px] font-medium" style={{ color: 'var(--market-brand)' }}>AI 对话发单</span>
+                    </div>
+                    <h2 className="text-[32px] font-semibold tracking-[-0.035em] mb-3" style={{ color: 'var(--text-primary)' }}>想发布什么任务？</h2>
+                    <p className="text-[15px] leading-6 max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
+                      选择任务方向并描述需求，AI 会结合分类逐步完善订单内容。不确定分类也没关系，可以直接开始。
+                    </p>
+                  </div>
+
+                  <div className="mb-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[12px] font-medium" style={{ color: 'var(--text-secondary)' }}>任务一级分类</span>
+                      {selectedPrimary && (
+                        <button
+                          onClick={() => { setSelectedPrimaryCategory(null); setSelectedSecondaryCategory(null); }}
+                          className="text-[11px] hover:underline"
+                          style={{ color: 'var(--text-tertiary)' }}
+                        >
+                          清除选择
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2" role="listbox" aria-label="任务一级分类">
+                      {TASK_CATEGORIES.map(category => {
+                        const Icon = category.icon;
+                        const selected = selectedPrimaryCategory === category.id;
+                        return (
+                          <button
+                            key={category.id}
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setSelectedPrimaryCategory(selected ? null : category.id);
+                              setSelectedSecondaryCategory(null);
+                            }}
+                            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-[0.98]"
+                            style={{
+                              color: selected ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                              backgroundColor: selected ? 'var(--market-brand)' : 'var(--bg-surface)',
+                              border: selected ? '1px solid var(--market-brand)' : '1px solid var(--border-default)',
+                              boxShadow: selected ? 'var(--market-shadow-card)' : 'none',
+                            }}
+                          >
+                            <Icon className="w-4 h-4" />
+                            {category.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <AnimatePresence initial={false}>
+                    {selectedPrimary && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                        className="mb-5"
+                        aria-live="polite"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-[12px] font-medium" style={{ color: 'var(--text-secondary)' }}>细分方向</span>
+                          <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>可选，不选也能直接开始</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2" role="listbox" aria-label={`${selectedPrimary.label}细分方向`}>
+                          {selectedPrimary.children.map(child => {
+                            const selected = selectedSecondaryCategory === child;
+                            return (
+                              <button
+                                key={child}
+                                role="option"
+                                aria-selected={selected}
+                                onClick={() => setSelectedSecondaryCategory(selected ? null : child)}
+                                className="px-3 py-1.5 rounded-full text-[12px] transition-all active:scale-[0.98]"
+                                style={{
+                                  color: selected ? 'var(--market-brand)' : 'var(--text-secondary)',
+                                  backgroundColor: selected ? 'var(--market-brand-subtle)' : 'var(--bg-subtle)',
+                                  border: selected ? '1px solid var(--market-brand-ring)' : '1px solid transparent',
+                                }}
+                              >
+                                {child}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="rounded-3xl p-3" style={{ border: '1px solid var(--market-brand-ring)', backgroundColor: 'var(--bg-surface)', boxShadow: 'var(--market-shadow-hover)' }}>
+                    <textarea
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(event) => setInputValue(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                          event.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder="描述项目目标、交付内容或已有想法……"
+                      rows={4}
+                      className="w-full resize-none bg-transparent outline-none text-[15px] leading-6 px-2 py-2 placeholder:text-[var(--text-tertiary)]"
+                      style={{ color: 'var(--text-primary)', maxHeight: '180px' }}
+                    />
+                    <div className="flex items-center justify-between gap-3 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <button className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} title="上传文档或图片" aria-label="上传文档或图片">
+                          <Paperclip className="w-4 h-4" />
+                        </button>
+                        {selectedPrimary ? (
+                          <div className="flex items-center gap-1.5 min-w-0 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                            <Tag className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{selectedPrimary.label}{selectedSecondaryCategory ? ` / ${selectedSecondaryCategory}` : ''}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                            <CircleHelp className="w-3.5 h-3.5" />
+                            AI 将根据描述自动判断分类
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleSend}
+                        disabled={!inputValue.trim()}
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-35 enabled:hover:scale-105 active:scale-[0.98]"
+                        style={{ backgroundColor: 'var(--market-brand)', color: 'white' }}
+                        aria-label="开始对话"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[11px] mt-3 text-center" style={{ color: 'var(--text-tertiary)' }}>
+                    Ctrl + Enter 发送 · 分类仅作为初始线索，AI 会根据对话内容动态调整
+                  </p>
                 </div>
               </div>
             ) : (
@@ -704,11 +858,11 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
             )}
           </div>
 
-          {/* 输入框区 — 只读模式下隐藏 */}
-          {!readonlyOrder && (
+          {/* 输入框区 — 初始态使用聚焦输入框，只读模式下隐藏 */}
+          {!readonlyOrder && !isNewDialogueState && (
           <div className="px-6 py-4" style={{ borderTop: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}>
             <div className="max-w-3xl mx-auto">
-              <div className="flex items-end gap-2 rounded-xl p-2" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-root)', boxShadow: 'var(--shadow-card)' }}>
+              <div className="flex items-end gap-2 rounded-3xl p-3" style={{ border: '1px solid var(--market-brand-ring)', backgroundColor: 'var(--bg-surface)', boxShadow: 'var(--market-shadow-hover)' }}>
                 <button className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} title="上传文档">
                   <Paperclip className="w-4 h-4" />
                 </button>
@@ -719,14 +873,14 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleSend(); } }}
                   placeholder="描述您的需求，AI 帮您生成订单…（Ctrl+Enter 发送）"
                   rows={1}
-                  className="flex-1 resize-none bg-transparent outline-none text-[13px] py-2"
+                  className="flex-1 resize-none bg-transparent outline-none text-[15px] py-3 placeholder:text-[var(--text-tertiary)]"
                   style={{ color: 'var(--text-primary)', maxHeight: '120px' }}
                 />
                 <button
                   onClick={handleSend}
                   disabled={!inputValue.trim()}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all shrink-0 disabled:opacity-40"
-                  style={{ backgroundColor: 'var(--brand)', color: 'white' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-40 enabled:hover:scale-105"
+                  style={{ backgroundColor: 'var(--market-brand)', color: 'white' }}
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -820,8 +974,8 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   /* 只读模式：查看完整订单详情 */
                   <button
                     onClick={onNavigateToMyOrders}
-                    className="w-full py-2.5 rounded-lg text-[13px] font-medium transition-all flex items-center justify-center gap-1.5"
-                    style={{ backgroundColor: 'var(--brand)', color: 'white', boxShadow: 'var(--shadow-card)' }}
+                    className="w-full py-3 rounded-full text-[14px] font-semibold transition-all flex items-center justify-center gap-1.5 hover:-translate-y-px"
+                    style={{ backgroundColor: 'var(--market-brand)', color: 'white', boxShadow: 'var(--market-shadow-card)' }}
                   >
                     查看完整订单详情 <ArrowRight className="w-3.5 h-3.5" />
                   </button>
@@ -829,8 +983,8 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   <button
                     onClick={() => setShowSubmitConfirm(true)}
                     disabled={activeDraft!.completeness < 80}
-                    className="w-full py-2.5 rounded-lg text-[13px] font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: 'var(--brand)', color: 'white', boxShadow: 'var(--shadow-card)' }}
+                    className="w-full py-3 rounded-full text-[14px] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:-translate-y-px"
+                    style={{ backgroundColor: 'var(--market-brand)', color: 'white', boxShadow: 'var(--market-shadow-card)' }}
                   >
                     {activeDraft!.completeness < 80 ? `信息完整度需达到80%（当前${activeDraft!.completeness}%）` : '确认并提交审核'}
                   </button>

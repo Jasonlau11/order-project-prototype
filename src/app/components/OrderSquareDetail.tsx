@@ -454,12 +454,12 @@ export function OrderSquareDetail({ isOpen, onClose, userRole, orderData }: Orde
           {/* 标题栏（含状态展示 — P0-06） */}
           <div
             className="relative overflow-hidden shrink-0"
-            style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 55%, #12103d 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 55%, #27130D 100%)' }}
           >
             <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-2xl pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(82,96,240,0.50) 0%, transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, rgba(255,106,61,0.50) 0%, transparent 70%)' }} />
             <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full blur-2xl pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.40) 0%, transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, rgba(255,139,92,0.40) 0%, transparent 70%)' }} />
             <div className="absolute inset-0 pointer-events-none" style={{
               backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
               backgroundSize: '60px 60px',
@@ -1315,7 +1315,7 @@ export function OrderSquareDetail({ isOpen, onClose, userRole, orderData }: Orde
                     className="px-5 py-2 rounded-md text-sm transition-opacity text-white"
                     style={isBidApplied
                       ? { backgroundColor: 'var(--text-disabled)', cursor: 'not-allowed' }
-                      : { background: 'linear-gradient(135deg, var(--brand), var(--info))', boxShadow: '0 4px 14px rgba(82,96,240,0.35)' }
+                      : { background: 'linear-gradient(135deg, var(--brand), var(--info))', boxShadow: '0 4px 14px rgba(255,106,61,0.35)' }
                     }
                   >
                     {isBidApplied ? '已报名' : '立即报名'}

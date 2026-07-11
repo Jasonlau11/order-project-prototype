@@ -131,7 +131,7 @@ export function BidSelectionModal({
                             <span className="text-sm font-semibold" style={{ color: getCreditLevelColor(bidder.creditLevel) }}>{bidder.creditScore}{bidder.creditLevel}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Award className="w-4 h-4 text-[#0066cc]" />
+                            <Award className="w-4 h-4 text-[var(--brand)]" />
                             <span className="text-sm font-medium text-[var(--text-primary)]">{bidder.completedProjects}</span>
                             <span className="text-sm text-[var(--text-tertiary)]">完成项目</span>
                           </div>
@@ -142,7 +142,7 @@ export function BidSelectionModal({
                           {bidder.skills.map((skill, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 bg-[#e7f5ff] text-[#0066cc] text-xs rounded-full"
+                              className="px-3 py-1 bg-[var(--brand-subtle)] text-[var(--brand)] text-xs rounded-full"
                             >
                               {skill}
                             </span>

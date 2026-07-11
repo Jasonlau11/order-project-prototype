@@ -2380,10 +2380,10 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]"
-              style={{ background: 'linear-gradient(135deg, #07091a 0%, #0d0b2e 60%, #0a0e28 100%)' }}>
+              style={{ background: 'linear-gradient(135deg, #100B09 0%, #1A100D 60%, #27130D 100%)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: 'rgba(82,96,240,0.25)', border: '1px solid rgba(82,96,240,0.35)' }}>
+                  style={{ backgroundColor: 'rgba(255,106,61,0.25)', border: '1px solid rgba(255,106,61,0.35)' }}>
                   <ShoppingCart className="w-4.5 h-4.5" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
@@ -2400,7 +2400,7 @@ export function OperationDashboard({ onNavigate }: { onNavigate?: (page: string)
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #7c3aed)' }} />
+                <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, var(--brand), #FF8A62)' }} />
                 <div className="px-5 py-4 grid grid-cols-2 gap-4">
                   <div>
                     <div className="text-[11px] text-[var(--text-tertiary)] mb-0.5">订单编号</div>

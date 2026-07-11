@@ -66,10 +66,10 @@ export function GlobalNav({
       className="sticky top-0 z-40"
       style={{
         height: '56px',
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(13,17,23,0.06)',
+        background: 'rgba(255,255,255,0.96)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--border-subtle)',
       }}
     >
       <div className="max-w-[1200px] mx-auto px-6 h-full flex items-center justify-between">
@@ -81,17 +81,17 @@ export function GlobalNav({
             className="flex items-center gap-2.5 group shrink-0"
           >
             <div
-              className="w-[34px] h-[34px] rounded-md flex items-center justify-center transition-colors"
-              style={{ backgroundColor: 'var(--brand)', transition: 'background-color var(--transition-fast)' }}
+              className="w-[34px] h-[34px] rounded-full flex items-center justify-center transition-colors shadow-[var(--market-shadow-card)]"
+              style={{ backgroundColor: 'var(--market-brand)', transition: 'background-color var(--transition-fast)' }}
             >
               <Zap className="w-[18px] h-[18px] text-white" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-[14px] font-semibold tracking-[-0.01em]" style={{ color: 'var(--text-primary)' }}>
-                OPC Order
+                CSDN Order
               </span>
               <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
-                订单广场
+                技术服务市场
               </span>
             </div>
           </button>
@@ -116,8 +116,8 @@ export function GlobalNav({
                   onClick={item.action}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${!isActive ? 'hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]' : ''}`}
                   style={{
-                    backgroundColor: isActive ? 'var(--bg-selected)' : 'transparent',
-                    color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
+                    backgroundColor: isActive ? 'var(--market-brand-subtle)' : 'transparent',
+                    color: isActive ? 'var(--market-brand)' : 'var(--text-secondary)',
                     transition: 'all var(--transition-fast)',
                   }}
                 >
@@ -167,8 +167,8 @@ export function GlobalNav({
               {showPublishButton && (
                 <button
                   onClick={() => onNavigateTo?.('order')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-white text-[13px] font-semibold rounded-md transition-all hover:bg-[var(--brand-hover)]"
-                  style={{ backgroundColor: 'var(--brand)', transition: 'all var(--transition-fast)' }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-white text-[13px] font-semibold rounded-full transition-all hover:-translate-y-px hover:bg-[var(--market-brand-hover)]"
+                  style={{ backgroundColor: 'var(--market-brand)', transition: 'all var(--transition-fast)' }}
                 >
                   <LayoutGrid className="w-[15px] h-[15px]" />
                   <span>我的工作台</span>
@@ -256,8 +256,8 @@ export function GlobalNav({
               </button>
               <button
                 onClick={onLogin}
-                className="px-4 py-1.5 text-white text-[13px] font-semibold rounded-md transition-all hover:bg-[var(--brand-hover)]"
-                style={{ backgroundColor: 'var(--brand)', transition: 'all var(--transition-fast)' }}
+                className="px-4 py-1.5 text-white text-[13px] font-semibold rounded-full transition-all hover:-translate-y-px hover:bg-[var(--market-brand-hover)]"
+                style={{ backgroundColor: 'var(--market-brand)', transition: 'all var(--transition-fast)' }}
               >
                 免费注册
               </button>
@@ -382,8 +382,8 @@ export function GlobalNav({
                   onClick={() => { item.action(); setMobileMenuOpen(false); }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-[14px] font-medium transition-all mb-1 ${!isActive ? 'hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]' : ''}`}
                   style={{
-                    backgroundColor: isActive ? 'var(--bg-selected)' : 'transparent',
-                    color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
+                    backgroundColor: isActive ? 'var(--market-brand-subtle)' : 'transparent',
+                    color: isActive ? 'var(--market-brand)' : 'var(--text-secondary)',
                     transition: 'all var(--transition-fast)',
                   }}
                 >

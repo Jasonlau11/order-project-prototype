@@ -475,7 +475,7 @@ export function AgreementTemplateConfig({ onNavigate }: AgreementTemplateConfigP
                           {template.applicableScenarios.map((scenario) => (
                             <span
                               key={scenario}
-                              className="px-2 py-1 bg-[#e7f5ff] text-[#0066cc] text-xs rounded"
+                              className="px-2 py-1 bg-[var(--brand-subtle)] text-[var(--brand)] text-xs rounded"
                             >
                               {scenario}
                             </span>
@@ -533,7 +533,7 @@ export function AgreementTemplateConfig({ onNavigate }: AgreementTemplateConfigP
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleDownload(template)}
-                          className="p-2 text-[#0066cc] hover:bg-[#e7f5ff] rounded transition-colors"
+                          className="p-2 text-[var(--brand)] hover:bg-[var(--brand-subtle)] rounded transition-colors"
                           title="导出模板信息"
                         >
                           <Download className="w-5 h-5" />

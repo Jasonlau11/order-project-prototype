@@ -160,7 +160,7 @@ export function MessageModal({ isOpen, onClose, orderId, orderTitle, customerNam
                 >
                   <div className="flex items-start gap-3">
                     {/* 头像 */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand)] to-[#7c8aff] flex items-center justify-center text-white font-medium flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand)] to-[#FF9D7E] flex items-center justify-center text-white font-medium flex-shrink-0">
                       {contact.name.charAt(0)}
                     </div>
 
@@ -172,7 +172,7 @@ export function MessageModal({ isOpen, onClose, orderId, orderTitle, customerNam
                             {contact.name}
                           </span>
                           {contact.isOfficial && (
-                            <span className="px-2 py-0.5 bg-[#e3f2fd] text-[#1976d2] text-xs rounded">
+                            <span className="px-2 py-0.5 bg-[var(--brand-subtle)] text-[var(--brand)] text-xs rounded">
                               官方
                             </span>
                           )}
@@ -212,7 +212,7 @@ export function MessageModal({ isOpen, onClose, orderId, orderTitle, customerNam
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="text-sm text-[#0066cc] hover:underline">
+                  <button className="text-sm text-[var(--brand)] hover:underline">
                     查看订单详情
                   </button>
                 </div>

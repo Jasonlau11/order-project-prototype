@@ -188,7 +188,7 @@ export function AccountSecurity({ userInfo, onBack, onUpdatePhone, onUpdateEmail
                       onChange={e => setVerifyCode(e.target.value)}
                       className="flex-1 px-4 py-3 border border-[#e0e0e0] rounded-md text-sm outline-none focus:border-[var(--brand)] bg-[var(--bg-hover)]"
                     />
-                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#e0e4ff]">
+                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#FFE1D5]">
                       发送验证码
                     </button>
                   </div>
@@ -222,7 +222,7 @@ export function AccountSecurity({ userInfo, onBack, onUpdatePhone, onUpdateEmail
                       onChange={e => setVerifyCode(e.target.value)}
                       className="flex-1 px-4 py-3 border border-[#e0e0e0] rounded-md text-sm outline-none focus:border-[var(--brand)] bg-[var(--bg-hover)]"
                     />
-                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#e0e4ff]">
+                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#FFE1D5]">
                       发送验证码
                     </button>
                   </div>
@@ -251,7 +251,7 @@ export function AccountSecurity({ userInfo, onBack, onUpdatePhone, onUpdateEmail
                       onChange={e => setVerifyCode(e.target.value)}
                       className="flex-1 px-4 py-3 border border-[#e0e0e0] rounded-md text-sm outline-none focus:border-[var(--brand)] bg-[var(--bg-hover)]"
                     />
-                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#e0e4ff]">
+                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#FFE1D5]">
                       发送验证码
                     </button>
                   </div>
@@ -285,7 +285,7 @@ export function AccountSecurity({ userInfo, onBack, onUpdatePhone, onUpdateEmail
                       onChange={e => setVerifyCode(e.target.value)}
                       className="flex-1 px-4 py-3 border border-[#e0e0e0] rounded-md text-sm outline-none focus:border-[var(--brand)] bg-[var(--bg-hover)]"
                     />
-                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#e0e4ff]">
+                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#FFE1D5]">
                       发送验证码
                     </button>
                   </div>
@@ -317,7 +317,7 @@ export function AccountSecurity({ userInfo, onBack, onUpdatePhone, onUpdateEmail
                       onChange={e => setVerifyCode(e.target.value)}
                       className="flex-1 px-4 py-3 border border-[#e0e0e0] rounded-md text-sm outline-none focus:border-[var(--brand)] bg-[var(--bg-hover)]"
                     />
-                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#e0e4ff]">
+                    <button className="px-4 py-3 bg-[var(--brand-bg)] text-[var(--brand)] rounded-md text-sm whitespace-nowrap hover:bg-[#FFE1D5]">
                       发送验证码
                     </button>
                   </div>

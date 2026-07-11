@@ -152,9 +152,9 @@ export function DeliveryToolConfigModal({
         {/* 弹窗内容 */}
         <div className="flex-1 overflow-auto p-6">
           {/* 提示信息 */}
-          <div className="mb-6 p-4 bg-[#e7f5ff] border-l-4 border-[#0066cc] rounded">
+          <div className="mb-6 p-4 bg-[var(--brand-subtle)] border-l-4 border-[var(--brand)] rounded">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-[#0066cc] flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-[var(--brand)] flex-shrink-0 mt-0.5" />
               <div className="text-sm text-[var(--text-primary)]">
                 <p className="mb-2">请从下方可选工具列表中选择本订单采用的交付工具。</p>
                 <p className="text-[var(--text-secondary)]">

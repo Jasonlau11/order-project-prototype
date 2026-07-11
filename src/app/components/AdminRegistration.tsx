@@ -171,7 +171,7 @@ export function AdminRegistration({ onNavigate }: AdminRegistrationProps) {
             onClick={() => onNavigate('order')}
             className="w-full py-2.5 text-white rounded-md text-sm transition-opacity hover:opacity-90"
             style={{
-              background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)',
+              background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)',
             }}
           >
             返回登录
@@ -208,7 +208,7 @@ export function AdminRegistration({ onNavigate }: AdminRegistrationProps) {
             <div
               className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
               style={{
-                background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)',
+                background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)',
               }}
             >
               <ShieldCheck className="w-5 h-5 text-white" />
@@ -417,8 +417,8 @@ export function AdminRegistration({ onNavigate }: AdminRegistrationProps) {
               onClick={handleSubmit}
               className="w-full py-2.5 text-white rounded-md text-sm transition-opacity hover:opacity-90 mt-2"
               style={{
-                background: 'linear-gradient(135deg, var(--brand) 0%, #7c5cf0 100%)',
-                boxShadow: '0 4px 14px rgba(82,96,240,0.35)',
+                background: 'linear-gradient(135deg, var(--brand) 0%, #FF8A62 100%)',
+                boxShadow: '0 4px 14px rgba(255,106,61,0.35)',
               }}
             >
               提交注册

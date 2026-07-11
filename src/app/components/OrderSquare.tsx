@@ -11,11 +11,36 @@ import { CustomerQualification } from './CustomerQualification';
 import { UserQualification } from './UserQualification';
 import { SkeletonCardGrid } from './Skeleton';
 import { EmptySearch } from './EmptyState';
+import { MarketHeroField } from './MarketHeroField';
 
 type UserRole = 'first-visit' | 'customer' | 'user' | 'browse-only';
 type SortField = 'publishTime' | 'budget' | 'bidCount';
 type SortOrder = 'asc' | 'desc';
 type PageView = 'list' | 'publish' | 'detail';
+type HeroAudience = 'customer' | 'contractor';
+
+const HERO_COPY: Record<HeroAudience, {
+  eyebrow: string;
+  titleLead: string;
+  titleAccent: string;
+  description: string;
+  searchPlaceholder: string;
+}> = {
+  customer: {
+    eyebrow: '面向有技术服务需求的客户',
+    titleLead: '发布技术需求，找到',
+    titleAccent: '可信交付伙伴',
+    description: '清晰描述目标与预算，快速连接匹配的技术服务方，让需求从发布、协作到验收全程有序推进。',
+    searchPlaceholder: '搜索服务方向、技术能力或相似需求...',
+  },
+  contractor: {
+    eyebrow: '面向具备专业能力的服务方',
+    titleLead: '发现优质项目，让',
+    titleAccent: '专业能力获得回报',
+    description: '浏览真实技术需求，凭能力与信用参与竞争，在规范协作和可信结算中持续积累项目成果。',
+    searchPlaceholder: '搜索订单标题、技术方向或交付要求...',
+  },
+};
 
 interface CreditDimensions {
   onTimeDeliveryRate: string;  // 按时交付率
@@ -329,15 +354,15 @@ function OrderCard({ order, onView, userRole }: { order: Order; onView: () => vo
 
   return (
     <div
-      className="relative bg-white rounded-md overflow-hidden cursor-pointer group transition-all duration-150 border border-[var(--border-subtle)] shadow-[var(--shadow-card)] hover:border-[var(--brand-ring)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-px"
+      className="relative bg-white rounded-2xl overflow-hidden cursor-pointer group transition-all duration-150 border border-[var(--border-subtle)] shadow-[var(--market-shadow-card)] hover:border-[var(--market-brand-ring)] hover:shadow-[var(--market-shadow-hover)] hover:-translate-y-px"
       style={{
         transition: 'all var(--transition-fast)',
-        padding: '16px',
+        padding: '22px',
       }}
       onClick={onView}
     >
       {/* Left type color bar — 3px, keep from old design (accessible via title) */}
-      <div className="absolute top-0 left-0 bottom-0" style={{ width: '3px', backgroundColor: typeConfig.borderColor }} title={order.taskType} />
+      <div className="absolute top-0 left-0 bottom-0 opacity-70" style={{ width: '3px', backgroundColor: typeConfig.borderColor }} title={order.taskType} />
 
       {/* Row 1: Type badge + Credit score */}
       <div className="flex items-center justify-between mb-2 gap-2">
@@ -393,12 +418,12 @@ function OrderCard({ order, onView, userRole }: { order: Order; onView: () => vo
       </div>
 
       {/* Title — 14px, semibold */}
-      <h3 className="text-[14px] font-semibold leading-snug line-clamp-1 mb-1.5 tracking-[-0.01em] transition-colors group-hover:text-[var(--brand)]" style={{ color: 'var(--text-primary)', transition: 'color var(--transition-fast)' }}>
+      <h3 className="text-[18px] font-semibold leading-snug line-clamp-1 mb-2 tracking-[-0.02em] transition-colors group-hover:text-[var(--market-brand)]" style={{ color: 'var(--text-primary)', transition: 'color var(--transition-fast)' }}>
         {order.title}
       </h3>
 
       {/* Description — 12px, 2-line clamp */}
-      <p className="text-[12px] line-clamp-2 mb-2.5 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+      <p className="text-[14px] line-clamp-2 mb-3.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
         {order.description}
       </p>
 
@@ -407,7 +432,7 @@ function OrderCard({ order, onView, userRole }: { order: Order; onView: () => vo
         <div className="flex items-center gap-1 mb-2.5 flex-wrap">
           {order.aiTags.map(tag => (
             <span key={tag}
-              className="inline-flex items-center px-1.5 rounded-sm text-[10px] font-medium"
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium"
               style={{ color: 'var(--text-tertiary)', backgroundColor: 'var(--bg-hover)' }}
             >
               {tag}
@@ -422,7 +447,7 @@ function OrderCard({ order, onView, userRole }: { order: Order; onView: () => vo
       {/* Bottom bar: Price + Stats + CTA */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="text-[14px] font-semibold" style={{ color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>
+          <span className="text-[18px] font-semibold" style={{ color: 'var(--market-brand)', fontVariantNumeric: 'tabular-nums' }}>
             {formatBudget(order.budgetMax)}
           </span>
           {order.deliveryMode && (
@@ -447,7 +472,7 @@ function OrderCard({ order, onView, userRole }: { order: Order; onView: () => vo
           </div>
         </div>
         {/* CTA — subtle arrow */}
-        <div className="flex items-center gap-0.5 text-[12px] font-medium transition-all group-hover:text-[var(--brand)] shrink-0" style={{ color: 'var(--text-tertiary)', transition: 'color var(--transition-fast)' }}>
+        <div className="flex items-center gap-0.5 text-[13px] font-semibold transition-all group-hover:text-[var(--market-brand)] shrink-0" style={{ color: 'var(--text-tertiary)', transition: 'color var(--transition-fast)' }}>
           查看 <ArrowRight className="w-[13px] h-[13px] transition-transform group-hover:translate-x-0.5" style={{ transition: 'transform var(--transition-fast)' }} />
         </div>
       </div>
@@ -471,9 +496,9 @@ function StatsBar({ filteredOrders, totalOrders }: { filteredOrders: Order[]; to
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 bg-white rounded-md mb-5 overflow-hidden" style={{ boxShadow: 'var(--shadow-card)', border: '1px solid var(--border-subtle)' }}>
+    <div className="grid grid-cols-2 sm:grid-cols-4 bg-white rounded-2xl mb-5 overflow-hidden" style={{ boxShadow: 'var(--market-shadow-card)', border: '1px solid var(--border-subtle)' }}>
       {stats.map(s => (
-        <div key={s.label} className="flex items-center gap-3 px-5 py-3.5" style={{ borderColor: 'var(--border-subtle)' }}>
+        <div key={s.label} className="flex items-center gap-3 px-5 py-4" style={{ borderColor: 'var(--border-subtle)' }}>
           <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: s.iconColor + '15' }}>
             <s.icon className="w-4 h-4" style={{ color: s.iconColor }} />
           </div>
@@ -509,6 +534,20 @@ export function OrderSquare({
   const [now, setNow] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredCreditId, setHoveredCreditId] = useState<number | null>(null);
+  const [heroAudience, setHeroAudience] = useState<HeroAudience>(userRole === 'customer' ? 'customer' : 'contractor');
+
+  useEffect(() => {
+    setHeroAudience(userRole === 'customer' ? 'customer' : 'contractor');
+  }, [userRole]);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+    const timer = window.setInterval(() => {
+      setHeroAudience(current => current === 'customer' ? 'contractor' : 'customer');
+    }, 9000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -675,71 +714,90 @@ export function OrderSquare({
   }
 
   return (
-    <div className="min-h-full" style={{ backgroundColor: 'var(--bg-root)' }}>
+    <div className="order-square-theme min-h-full" style={{ backgroundColor: 'var(--bg-root)' }}>
       {showRoleSelection && <RoleSelectionModal onSelect={handleRoleSelect} />}
 
-      {/* Hero — v4.0: dark clean, simple */}
-      <div className="relative" style={{ background: 'var(--bg-hero)' }}>
-        <div className="max-w-[1200px] mx-auto px-6 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2.5 py-1 text-[11px] font-medium rounded-md" style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-muted)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                  {normalOrders.length} 个订单正在招募中
+      {/* Hero — curl-flow particle rivers as a quiet marketplace signal layer */}
+      <section className="market-hero-shell relative overflow-hidden" style={{ background: 'var(--market-hero-bg)' }}>
+        <div className="market-hero-ambient" aria-hidden="true">
+          <MarketHeroField />
+          <div className="market-hero-readability" />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, var(--market-hero-accent-line), transparent)' }} />
+        <div className="relative z-20 mx-auto max-w-[1200px] px-4 py-11 sm:px-6 sm:py-14 lg:py-16">
+          <div className="flex flex-col items-center justify-center gap-5 text-center sm:gap-6">
+            <div className="flex w-full flex-col items-center">
+              <div className="mb-4 flex items-center gap-2" aria-label="Hero 文案受众切换">
+                {(['customer', 'contractor'] as HeroAudience[]).map(audience => (
+                  <button key={audience} type="button" onClick={() => setHeroAudience(audience)}
+                    className={`market-hero-audience-tab rounded-full px-3 py-1.5 text-[12px] font-medium ${heroAudience === audience ? 'is-active' : ''}`}
+                    aria-pressed={heroAudience === audience}>
+                    {audience === 'customer' ? '我要发单' : '我要接单'}
+                  </button>
+                ))}
+                <span className="hidden text-[12px] sm:inline" style={{ color: 'var(--market-hero-text-soft)' }}>
+                  {normalOrders.length} 个技术订单正在招募中
                 </span>
               </div>
-              <h1 className="text-[28px] font-semibold tracking-[-0.01em] mb-2" style={{ color: 'var(--text-inverse)' }}>
-                发现优质技术订单
-              </h1>
-              <p className="text-[13px] max-w-lg leading-relaxed" style={{ color: 'var(--text-inverse-muted)' }}>
-                汇聚软件开发、设计创作、营销推广等各类优质项目，精准匹配客户与服务提供方
-              </p>
+              <div className="market-hero-copy-stage relative min-h-[146px] w-full sm:min-h-[154px]" aria-live="polite">
+                {(['customer', 'contractor'] as HeroAudience[]).map(audience => (
+                  <div key={audience}
+                    className={`market-hero-copy-layer absolute inset-0 flex w-full flex-col items-center ${heroAudience === audience ? 'is-active' : ''}`}
+                    aria-hidden={heroAudience !== audience}>
+                    <span className="mb-3 text-[12px] font-medium tracking-[0.08em]" style={{ color: 'var(--market-hero-accent)' }}>
+                      {HERO_COPY[audience].eyebrow}
+                    </span>
+                    <h1 className="mb-3 text-[32px] font-semibold leading-[1.14] tracking-[-0.04em] sm:text-[40px] lg:text-[46px]" style={{ color: 'var(--market-hero-text)' }}>
+                      {HERO_COPY[audience].titleLead}<span style={{ color: 'var(--market-hero-accent)' }}>{HERO_COPY[audience].titleAccent}</span>
+                    </h1>
+                    <p className="max-w-[920px] px-2 text-[14px] leading-6 sm:px-0 sm:text-[15px] sm:leading-7 lg:whitespace-nowrap lg:text-[16px]" style={{ color: 'var(--market-hero-text-muted)' }}>
+                      {HERO_COPY[audience].description}
+                    </p>
+                  </div>
+                ))}
+              </div>
 
-              {/* Search bar */}
-              <div className="mt-4 flex items-center gap-2.5 max-w-xl">
-                <div className="flex-1 flex items-center gap-2 rounded-md px-3 py-2" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--text-inverse-muted)' }} />
-                  <input type="text" placeholder="搜索订单标题、描述..." value={keyword}
-                    onChange={e => { setKeyword(e.target.value); setCurrentPage(1); }}
-                    className="flex-1 bg-transparent border-none outline-none text-[13px] text-white placeholder:text-white/30"
+              <form className="mt-5 flex w-full max-w-2xl flex-col gap-3 sm:mt-6 sm:flex-row" onSubmit={event => event.preventDefault()} role="search">
+                <label className="market-hero-search flex min-w-0 flex-1 items-center gap-2 rounded-full px-4 py-3.5 sm:px-5">
+                  <Search className="h-5 w-5 shrink-0" style={{ color: 'var(--market-hero-accent)' }} />
+                  <span className="sr-only">搜索技术订单或服务能力</span>
+                  <input type="search" placeholder={HERO_COPY[heroAudience].searchPlaceholder} value={keyword}
+                    onChange={event => { setKeyword(event.target.value); setCurrentPage(1); }}
+                    className="min-w-0 flex-1 border-none bg-transparent text-[15px] text-white outline-none placeholder:text-white/35"
                   />
-                  {keyword && <button onClick={() => setKeyword('')}><X className="w-4 h-4 text-white/40 hover:text-white" /></button>}
-                </div>
-                <button className="px-4 py-2 text-white text-[13px] font-semibold rounded-md transition-all hover:bg-[var(--brand-hover)]"
-                  style={{ backgroundColor: 'var(--brand)', transition: 'background-color var(--transition-fast)' }}>
+                  {keyword && <button type="button" aria-label="清空搜索" onClick={() => setKeyword('')}><X className="h-4 w-4 text-white/45 transition-colors hover:text-white" /></button>}
+                </label>
+                <button type="submit" className="market-hero-primary rounded-full px-6 py-3.5 text-[14px] font-semibold transition-all hover:-translate-y-px sm:shrink-0">
                   搜索
                 </button>
-              </div>
+              </form>
             </div>
 
-            {/* Right: Actions */}
-            <div className="flex flex-col gap-2.5 shrink-0">
+            <div className="flex max-w-full flex-wrap items-center justify-center gap-2.5">
               {userRole === 'customer' && (
                 <button onClick={() => setPageView('publish')}
-                  className="flex items-center gap-2 text-white px-5 py-2.5 rounded-md transition-all text-[13px] font-semibold hover:bg-[var(--brand-hover)]"
-                  style={{ backgroundColor: 'var(--brand)', transition: 'background-color var(--transition-fast)' }}>
-                  <Plus className="w-4 h-4" /> 发布订单
+                  className="flex items-center gap-2 rounded-full border px-5 py-2.5 text-[13px] font-semibold transition-all hover:-translate-y-px"
+                  style={{ backgroundColor: 'var(--market-hero-accent-soft)', color: 'var(--market-hero-accent)', borderColor: 'rgba(255,106,61,0.26)' }}>
+                  <Plus className="h-4 w-4" /> 发布订单
                 </button>
               )}
               <button onClick={onNavigateToMyOrders}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-md text-[13px] font-medium transition-all hover:bg-white/15"
-                style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse)', border: '1px solid rgba(255,255,255,0.12)', transition: 'background-color var(--transition-fast)' }}>
-                <FileText className="w-4 h-4" /> 我的订单
+                className="market-hero-secondary flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium transition-all hover:-translate-y-px">
+                <FileText className="h-4 w-4" /> 我的订单
               </button>
               {(userRole === 'first-visit' || userRole === 'browse-only') && (
-                <div className="flex items-center gap-2 text-[13px]" style={{ color: 'var(--text-inverse-muted)' }}>
-                  <Tag className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2 text-[12px] sm:text-[13px]" style={{ color: 'var(--market-hero-text-soft)' }}>
+                  <Tag className="h-3.5 w-3.5" />
                   <span>当前身份：{userRole === 'first-visit' ? '首次访问' : '仅浏览'}</span>
                 </div>
               )}
-              {/* Role switcher */}
-              <div className="flex items-center gap-0.5 rounded-md p-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}>
+              <div className="market-hero-role-switcher flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-0.5">
                 {(['first-visit', 'customer', 'user', 'browse-only', 'admin'] as UserRole[]).map(role => {
                   const labels: Record<UserRole, string> = { 'first-visit': '首访', 'customer': '客户', 'user': '用户', 'browse-only': '浏览', 'admin': '运营' };
                   return (
                     <button key={role} onClick={() => setUserRole(role)}
-                      className="px-3 py-1 rounded-sm text-[12px] font-medium transition-all"
-                      style={userRole === role ? { backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' } : { color: 'var(--text-inverse-muted)', transition: 'all var(--transition-fast)' }}>
+                      className="shrink-0 rounded-full px-3 py-1 text-[12px] font-medium transition-all"
+                      style={userRole === role ? { backgroundColor: 'var(--market-hero-accent)', color: 'var(--market-hero-ink)' } : { color: 'rgba(248,250,247,0.62)' }}>
                       {labels[role]}
                     </button>
                   );
@@ -748,14 +806,14 @@ export function OrderSquare({
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto px-6 py-5">
         <StatsBar filteredOrders={filteredOrders} totalOrders={normalOrders} />
 
         {/* Filters bar */}
-        <div className="rounded-md px-4 py-3 mb-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        <div className="rounded-2xl px-4 py-3 mb-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--market-shadow-card)' }}>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             {/* Type filter dropdown — tree multi-select */}
             <div className="relative shrink-0">
@@ -763,11 +821,11 @@ export function OrderSquare({
                 onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all border"
                 style={taskTypeFilter.size > 0
-                  ? { color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)', borderColor: 'var(--brand-ring)' }
+                  ? { color: 'var(--market-brand)', backgroundColor: 'var(--market-brand-subtle)', borderColor: 'var(--market-brand-ring)' }
                   : { color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }}>
                 订单类型
                 {taskTypeFilter.size > 0 && (
-                  <span className="px-1.5 py-0.5 text-white text-[10px] rounded-full font-semibold leading-none" style={{ backgroundColor: 'var(--brand)' }}>{taskTypeFilter.size}</span>
+                  <span className="px-1.5 py-0.5 text-white text-[10px] rounded-full font-semibold leading-none" style={{ backgroundColor: 'var(--market-brand)' }}>{taskTypeFilter.size}</span>
                 )}
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>

@@ -80,9 +80,9 @@ export function ConfirmAgreementModal({
         <div className="flex-1 overflow-auto px-8 py-6">
           <div className="space-y-6">
             {/* 提示信息 */}
-            <div className="bg-[#e7f5ff] border-l-4 border-[#0066cc] rounded-lg p-4">
+            <div className="bg-[var(--brand-subtle)] border-l-4 border-[var(--brand)] rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-[#0066cc] mt-0.5 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 text-[var(--brand)] mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-[var(--text-secondary)]">
                   <p className="font-medium text-[var(--text-primary)] mb-2">重要说明：</p>
                   <ul className="space-y-1 list-disc list-inside">
@@ -118,7 +118,7 @@ export function ConfirmAgreementModal({
                     
                     <button
                       onClick={handleDownload}
-                      className="ml-4 px-4 py-2 bg-[#0066cc] text-white rounded-full text-sm hover:bg-[#0052a3] transition-colors flex items-center gap-2 flex-shrink-0"
+                      className="ml-4 px-4 py-2 bg-[var(--brand)] text-white rounded-full text-sm hover:bg-[var(--brand-hover)] transition-colors flex items-center gap-2 flex-shrink-0"
                     >
                       <Download className="w-4 h-4" />
                       下载查看

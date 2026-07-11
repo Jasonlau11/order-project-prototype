@@ -152,8 +152,8 @@ Workspace：CSDN订单1001工作空间
         {/* 弹窗头部 */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#e3f2fd] rounded-lg flex items-center justify-center">
-              <Key className="w-5 h-5 text-[#1976d2]" />
+            <div className="w-10 h-10 bg-[var(--brand-subtle)] rounded-lg flex items-center justify-center">
+              <Key className="w-5 h-5 text-[var(--brand)]" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-[var(--text-primary)]">开发资源获取</h2>
