@@ -152,7 +152,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
       id: 'module-requirements',
       title: '需求说明',
       badge: 'AI生成',
-      icon: <FileText className="w-5 h-5 text-[#0066cc]" />,
+      icon: <FileText className="w-5 h-5 text-[var(--brand)]" />,
       content: '## 技术方案\n\n计划采用以下技术栈进行开发：\n- **前端:** React 18 + TypeScript + Ant Design 5\n- **后端:** Node.js + NestJS + PostgreSQL\n- **云服务:** 腾讯云 Serverless + COS 对象存储\n- **架构参考:** 详见 [技术规格书](https://example.com/tech-spec)\n- **原型设计:** 参考附件 `原型设计稿.fig`\n\n## 功能需求\n\n需要实现以下核心功能：\n1. 人事管理: 员工档案管理、考勤打卡、绩效评估系统\n2. 财务管理: 费用报销流程、预算管理、多格式报表导出(PDF/Excel)\n3. 项目管理: 任务分配、甘特图展示、工时统计\n4. 系统集成: 对接企业微信、飞书等IM平台',
     },
     {
@@ -353,9 +353,9 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
   // 获取状态标签
   const getStatusBadge = (status: OrderStatus) => {
     const statusConfig: Record<OrderStatus, { text: string; color: string }> = {
-      promoting: { text: '推广中', color: 'bg-[#e7f5ff] text-[#0066cc]' },
+      promoting: { text: '推广中', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
       signing: { text: '协议签署中', color: 'bg-[#fff8e1] text-[#f57c00]' },
-      inProgress: { text: '交付中', color: 'bg-[#e3f2fd] text-[#1976d2]' },
+      inProgress: { text: '交付中', color: 'bg-[var(--brand-subtle)] text-[var(--brand)]' },
       accepted: { text: '已验收', color: 'bg-[var(--success-bg)] text-[var(--success-text)]' },
       waitingSettlement: { text: '待结算', color: 'bg-[var(--brand-bg)] text-[var(--brand)]' },
       settled: { text: '已结算', color: 'bg-[var(--success-bg)] text-[var(--success-text)]' },
@@ -688,7 +688,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
   // 获取标签颜色
   const getTagColor = (category: string) => {
     switch (category) {
-      case 'skill': return 'bg-[#e6f0ff] text-[#0066cc] border-[#91caff]';
+      case 'skill': return 'bg-[var(--brand-subtle)] text-[var(--brand)] border-[var(--brand-ring)]';
       case 'industry': return 'bg-[#e6ffe6] text-[#389e0d] border-[#b7eb8f]';
       case 'delivery': return 'bg-[#fff3e0] text-[#e65100] border-[#ffd591]';
       default: return 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-[var(--border-subtle)]';
@@ -706,7 +706,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
 
   const getTagCategoryColor = (category: string) => {
     switch (category) {
-      case 'skill': return 'text-[#0066cc]';
+      case 'skill': return 'text-[var(--brand)]';
       case 'industry': return 'text-[#389e0d]';
       case 'delivery': return 'text-[#e65100]';
       default: return 'text-[var(--text-tertiary)]';
@@ -872,7 +872,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
             <CollapsibleCard
               id="module-requirements"
               title="需求说明"
-              icon={<FileText className="w-5 h-5 text-[#0066cc]" />}
+              icon={<FileText className="w-5 h-5 text-[var(--brand)]" />}
               badge="AI生成"
               defaultOpen={!allCollapsed}
             >
@@ -1000,7 +1000,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
                       {selectedTools.length > 0 && (
                         <button
                           onClick={() => setShowResourceModal(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0066cc] text-white rounded-full text-xs hover:bg-[#004499] transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--brand)] text-white rounded-full text-xs hover:bg-[var(--brand-hover)] transition-colors"
                         >
                           <Key className="w-3.5 h-3.5" />
                           <span>获取资源</span>
@@ -1087,7 +1087,7 @@ export function OrderDetail({ isOpen, onClose, userRole, orderId, onTerminateOrd
                           <div className="mt-3 p-3 bg-[var(--bg-hover)] rounded-lg">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-[#0066cc]" />
+                                <FileText className="w-4 h-4 text-[var(--brand)]" />
                                 <div>
                                   <div className="text-sm font-medium text-[var(--text-primary)]">{milestone.deliverable.fileName || milestone.deliverable.content}</div>
                                   {milestone.deliverable.fileSize && (

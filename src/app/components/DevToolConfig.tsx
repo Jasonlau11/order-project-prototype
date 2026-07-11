@@ -913,8 +913,8 @@ export function DevToolConfig({ onNavigate }: { onNavigate?: (page: string) => v
               </div>
 
               {configScope === 'order' && (
-                <div className="p-4 rounded-lg flex items-start gap-3 bg-[#ebf5fb] border border-[#2980b9] border-l-4">
-                  <Info className="w-5 h-5 text-[#2980b9] flex-shrink-0 mt-0.5" />
+                <div className="p-4 rounded-lg flex items-start gap-3 bg-[var(--brand-subtle)] border border-[var(--brand-ring)] border-l-4">
+                  <Info className="w-5 h-5 text-[var(--brand)] flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="text-sm font-medium text-[#2c3e50]">配置优先级：订单级 &gt; 任务类型级</div>
                     <div className="text-xs text-[#7f8c8d] mt-1">订单级配置会覆盖对应任务类型的默认配置，仅对当前订单生效。</div>
