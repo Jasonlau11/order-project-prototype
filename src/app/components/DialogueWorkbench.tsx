@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Send, Paperclip, Sparkles, RefreshCw, ChevronDown, ChevronRight,
   CheckCircle, Clock, FileText, MessageSquare, LayoutGrid, X, Edit3,
   AlertCircle, Info, Trash2, ArrowRight, Tag, Code2, Palette, Video,
-  PenLine, FlaskConical, Megaphone, Cpu, CircleHelp,
+  PenLine, FlaskConical, Megaphone, Cpu, CircleHelp, Image, Download,
+  Copy, Check, LoaderCircle, BrainCircuit,
 } from 'lucide-react';
 
 interface DialogueWorkbenchProps {
@@ -17,11 +19,30 @@ interface DialogueWorkbenchProps {
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
+interface ChatAttachment {
+  id: string;
+  name: string;
+  type: 'image' | 'document';
+  size: string;
+  previewUrl?: string;
+  status: 'ready' | 'analyzing' | 'completed' | 'failed';
+}
+
+interface GeneratedFile {
+  name: string;
+  format: 'md' | 'txt' | 'csv' | 'docx' | 'xlsx';
+  size: string;
+  description: string;
+}
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'ai';
   content: string;
   timestamp: number;
+  attachments?: ChatAttachment[];
+  generatedFile?: GeneratedFile;
+  generatedFiles?: GeneratedFile[];
 }
 
 interface SkeletonModule {
@@ -206,9 +227,45 @@ const formatTime = (ts: number) => {
 
 const newId = () => Math.random().toString(36).slice(2, 11);
 
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
+
+const ACCEPTED_ATTACHMENT_TYPES = '.pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg,.webp';
+
 // ── AI 模拟回复 ──────────────────────────────────────────────────────────────
-const generateAIResponse = (userInput: string, draft: DraftSession | null): { reply: string; shouldShowPreview: boolean; updatedModules?: Partial<SkeletonModule>[] } => {
+const generateAIResponse = (userInput: string, draft: DraftSession | null, attachments: ChatAttachment[] = []): { reply: string; shouldShowPreview: boolean; generatedFile?: GeneratedFile; generatedFiles?: GeneratedFile[] } => {
+  if (attachments.length > 0) {
+    const imageCount = attachments.filter(file => file.type === 'image').length;
+    const documentCount = attachments.length - imageCount;
+    const sourceLabel = [imageCount ? `${imageCount} 张图片` : '', documentCount ? `${documentCount} 份文档` : ''].filter(Boolean).join('和');
+    return {
+      reply: `已完成对${sourceLabel}的识别与解析。我从材料中提取到以下关键信息：\n\n1. 项目目标：建设一套可用于实际业务的数字化能力\n2. 核心范围：需求梳理、方案设计、开发实施与交付文档\n3. 交付要求：需提供可验收成果及配套说明\n4. 待确认信息：具体预算、最终工期和接单方要求\n\n我已将已识别内容同步到右侧订单草稿。您可以继续补充信息，也可以下载我整理的需求摘要。`,
+      shouldShowPreview: true,
+      generatedFile: {
+        name: 'AI解析需求摘要.md',
+        format: 'md',
+        size: '3 KB',
+        description: '根据本轮上传材料自动整理',
+      },
+      generatedFiles: [
+        { name: 'AI解析需求摘要.md', format: 'md', size: '3 KB', description: 'Markdown需求摘要' },
+        { name: '订单需求说明书.docx', format: 'docx', size: '12 KB', description: '可编辑Word文档' },
+        { name: '订单信息清单.xlsx', format: 'xlsx', size: '9 KB', description: '结构化Excel清单' },
+        { name: '需求原文整理.txt', format: 'txt', size: '2 KB', description: '纯文本备份' },
+      ],
+    };
+  }
+
   const input = userInput.toLowerCase();
+
+  if (input.includes('代码') || input.includes('示例程序') || input.includes('接口示例')) {
+    return {
+      reply: `可以。下面是一个将对话内容整理为订单草稿的 TypeScript 示例：\n\n\`\`\`typescript\ntype OrderDraft = {\n  title: string;\n  requirements: string[];\n  budget?: number;\n};\n\nexport function buildOrderDraft(input: string): OrderDraft {\n  return {\n    title: input.slice(0, 20) || '新订单',\n    requirements: input.split('，').filter(Boolean),\n  };\n}\n\`\`\`\n\n这段代码只是演示生成能力。实际接入时，模型返回的结构化结果仍需经过后端业务校验后再写入订单。`,
+      shouldShowPreview: false,
+    };
+  }
 
   // 检测修改指令
   if (input.includes('预算') || input.includes('改')) {
@@ -266,9 +323,14 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
   const [orderFilter, setOrderFilter] = useState<string>('all');
   const [selectedPrimaryCategory, setSelectedPrimaryCategory] = useState<string | null>(null);
   const [selectedSecondaryCategory, setSelectedSecondaryCategory] = useState<string | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<ChatAttachment[]>([]);
+  const [isAIProcessing, setIsAIProcessing] = useState(false);
+  const [aiThinkingStage, setAIThinkingStage] = useState(0);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const roleSwitcherRef = useRef<HTMLDivElement>(null);
 
   const activeDraft = drafts.find(d => d.id === activeDraftId) || null;
@@ -289,6 +351,17 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    if (!isAIProcessing) {
+      setAIThinkingStage(0);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setAIThinkingStage(stage => Math.min(stage + 1, 2));
+    }, 700);
+    return () => window.clearInterval(timer);
+  }, [isAIProcessing]);
+
   // ── 新建草稿 ───────────────────────────────────────────────────────────────
   const handleNewDraft = () => {
     const newDraft: DraftSession = {
@@ -307,23 +380,122 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
     setReadonlyOrder(null);
     setShowPreview(false);
     setInputValue('');
+    setPendingAttachments([]);
+    setIsAIProcessing(false);
     setSelectedPrimaryCategory(null);
     setSelectedSecondaryCategory(null);
     inputRef.current?.focus();
   };
 
+  const handleSelectAttachments = (files: FileList | null) => {
+    if (!files) return;
+    const nextFiles = Array.from(files).slice(0, 3 - pendingAttachments.length).map(file => {
+      const isImage = file.type.startsWith('image/');
+      return {
+        id: newId(),
+        name: file.name,
+        type: isImage ? 'image' as const : 'document' as const,
+        size: formatFileSize(file.size),
+        previewUrl: isImage ? URL.createObjectURL(file) : undefined,
+        status: 'ready' as const,
+      };
+    });
+    setPendingAttachments(prev => [...prev, ...nextFiles].slice(0, 3));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePendingAttachment = (attachmentId: string) => {
+    setPendingAttachments(prev => {
+      const target = prev.find(file => file.id === attachmentId);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter(file => file.id !== attachmentId);
+    });
+  };
+
+  const handleCopyMessage = async (message: ChatMessage) => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopiedMessageId(message.id);
+      setTimeout(() => setCopiedMessageId(null), 1600);
+    } catch {
+      setCopiedMessageId(null);
+    }
+  };
+
+  const triggerBlobDownload = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadGeneratedFile = async (message: ChatMessage, file = message.generatedFile) => {
+    if (!file) return;
+    const draftTitle = activeDraft?.title || '订单需求';
+    const summary = message.content.replace(/```[\s\S]*?```/g, '').trim();
+
+    if (file.format === 'docx') {
+      const { Document, HeadingLevel, Packer, Paragraph, TextRun } = await import('docx');
+      const document = new Document({
+        sections: [{
+          children: [
+            new Paragraph({ text: draftTitle, heading: HeadingLevel.TITLE }),
+            new Paragraph({ text: 'AI解析需求说明书', heading: HeadingLevel.HEADING_1 }),
+            ...summary.split('\n').filter(Boolean).map(line => new Paragraph({ children: [new TextRun(line.replace(/^\d+\.\s*/, ''))], bullet: /^\d+\./.test(line) ? { level: 0 } : undefined })),
+            new Paragraph({ text: '本文件由多模态模型根据用户上传材料和对话内容自动整理，提交订单前请人工确认。', heading: HeadingLevel.HEADING_2 }),
+          ],
+        }],
+      });
+      triggerBlobDownload(await Packer.toBlob(document), file.name);
+      return;
+    }
+
+    if (file.format === 'xlsx') {
+      const { default: JSZip } = await import('jszip');
+      const escapeXml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const rows = [
+        ['字段', 'AI提取结果'],
+        ['订单标题', draftTitle],
+        ['项目目标', '建设一套可用于实际业务的数字化能力'],
+        ['核心范围', '需求梳理、方案设计、开发实施与交付文档'],
+        ['交付要求', '提供可验收成果及配套说明'],
+        ['待确认项', '预算、工期、接单方要求'],
+      ];
+      const rowXml = rows.map((row, rowIndex) => `<row r="${rowIndex + 1}">${row.map((value, columnIndex) => `<c r="${columnIndex === 0 ? 'A' : 'B'}${rowIndex + 1}" t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`).join('')}</row>`).join('');
+      const zip = new JSZip();
+      zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>');
+      zip.folder('_rels')?.file('.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+      zip.folder('xl')?.file('workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="订单需求" sheetId="1" r:id="rId1"/></sheets></workbook>');
+      zip.folder('xl')?.folder('_rels')?.file('workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>');
+      zip.folder('xl')?.folder('worksheets')?.file('sheet1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="58" customWidth="1"/></cols><sheetData>${rowXml}</sheetData></worksheet>`);
+      triggerBlobDownload(await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), file.name);
+      return;
+    }
+
+    const plainContent = file.format === 'csv'
+      ? `字段,AI提取结果\n订单标题,"${draftTitle}"\n项目目标,建设一套可用于实际业务的数字化能力\n核心范围,"需求梳理、方案设计、开发实施与交付文档"\n`
+      : file.format === 'md'
+        ? `# ${draftTitle}\n\n## AI 解析摘要\n\n${message.content}\n\n> 提交订单前请人工确认。\n`
+        : `${draftTitle}\n\nAI解析摘要\n\n${summary}\n\n提交订单前请人工确认。\n`;
+    const mime = file.format === 'csv' ? 'text/csv;charset=utf-8' : file.format === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+    triggerBlobDownload(new Blob([plainContent], { type: mime }), file.name);
+  };
+
   // ── 发送消息 ───────────────────────────────────────────────────────────────
   const handleSend = () => {
     const text = inputValue.trim();
-    if (!text) return;
+    if ((!text && pendingAttachments.length === 0) || isAIProcessing) return;
 
     let targetDraft = activeDraft;
+    const attachments = pendingAttachments.map(file => ({ ...file, status: 'analyzing' as const }));
+    const fallbackTitle = attachments.length > 0 ? `解析${attachments[0].name}` : text.slice(0, 20);
 
-    // 如果没有活跃草稿，创建一个
     if (!targetDraft) {
       targetDraft = {
         id: newId(),
-        title: text.slice(0, 20),
+        title: fallbackTitle,
         lastEditTime: Date.now(),
         status: 'in_progress',
         completeness: 0,
@@ -338,38 +510,56 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
       setActiveDraftId(targetDraft.id);
     }
 
-    const userMsg: ChatMessage = { id: newId(), role: 'user', content: text, timestamp: Date.now() };
-    const { reply, shouldShowPreview } = generateAIResponse(text, targetDraft);
-    const categoryPath = [selectedPrimary?.label, selectedSecondaryCategory].filter(Boolean).join(' / ');
-    const isFirstMessage = targetDraft.messages.length === 0;
-    const aiReply = isFirstMessage && categoryPath
-      ? `已按「${categoryPath}」方向开始梳理。如果后续描述涉及其他任务类型，我会为您调整分类。\n\n${reply}`
-      : reply;
-    const aiMsg: ChatMessage = { id: newId(), role: 'ai', content: aiReply, timestamp: Date.now() + 1 };
+    const draftId = targetDraft.id;
+    const userMsg: ChatMessage = {
+      id: newId(),
+      role: 'user',
+      content: text || '请分析这些材料并帮我整理成订单需求。',
+      timestamp: Date.now(),
+      attachments,
+    };
 
-    setDrafts(prev => prev.map(d => {
-      if (d.id !== targetDraft!.id) return d;
-      const newCompleteness = Math.min(100, d.completeness + (text.length > 50 ? 25 : 15));
-      const newTitle = d.messages.length === 0 ? text.slice(0, 20) : d.title;
-      return {
-        ...d,
-        title: newTitle,
-        messages: [...d.messages, userMsg, aiMsg],
-        lastEditTime: Date.now(),
-        completeness: newCompleteness,
-        modules: d.modules.length === 0 && shouldShowPreview ? generateMockModules() : d.modules,
-        taskTypes: d.taskTypes.length > 0 ? d.taskTypes : selectedPrimary ? [selectedPrimary.label] : [],
-        tags: d.tags.length > 0 ? d.tags : selectedSecondaryCategory ? [selectedSecondaryCategory] : [],
-        primaryCategory: d.primaryCategory || selectedPrimary?.label,
-        secondaryCategory: d.secondaryCategory || selectedSecondaryCategory || undefined,
-      };
-    }));
-
+    setDrafts(prev => prev.map(d => d.id === draftId ? {
+      ...d,
+      title: d.messages.length === 0 ? fallbackTitle : d.title,
+      messages: [...d.messages, userMsg],
+      lastEditTime: Date.now(),
+    } : d));
     setInputValue('');
+    setPendingAttachments([]);
+    setIsAIProcessing(true);
 
-    if (shouldShowPreview && !showPreview) {
-      setTimeout(() => setShowPreview(true), 300);
-    }
+    setTimeout(() => {
+      const { reply, shouldShowPreview, generatedFile, generatedFiles } = generateAIResponse(text, targetDraft, attachments);
+      const categoryPath = [selectedPrimary?.label, selectedSecondaryCategory].filter(Boolean).join(' / ');
+      const isFirstMessage = targetDraft!.messages.length === 0;
+      const aiReply = isFirstMessage && categoryPath
+        ? `已按「${categoryPath}」方向开始梳理。如果后续材料涉及其他任务类型，我会为您调整分类。\n\n${reply}`
+        : reply;
+      const aiMsg: ChatMessage = { id: newId(), role: 'ai', content: aiReply, timestamp: Date.now(), generatedFile, generatedFiles };
+
+      setDrafts(prev => prev.map(d => {
+        if (d.id !== draftId) return d;
+        const completedMessages = d.messages.map(message => message.id === userMsg.id ? {
+          ...message,
+          attachments: message.attachments?.map(file => ({ ...file, status: 'completed' as const })),
+        } : message);
+        const increment = attachments.length > 0 ? 45 : text.length > 50 ? 25 : 15;
+        return {
+          ...d,
+          messages: [...completedMessages, aiMsg],
+          lastEditTime: Date.now(),
+          completeness: Math.min(100, d.completeness + increment),
+          modules: d.modules.length === 0 && shouldShowPreview ? generateMockModules() : d.modules,
+          taskTypes: d.taskTypes.length > 0 ? d.taskTypes : selectedPrimary ? [selectedPrimary.label] : [],
+          tags: d.tags.length > 0 ? d.tags : selectedSecondaryCategory ? [selectedSecondaryCategory] : [],
+          primaryCategory: d.primaryCategory || selectedPrimary?.label,
+          secondaryCategory: d.secondaryCategory || selectedSecondaryCategory || undefined,
+        };
+      }));
+      if (shouldShowPreview) setShowPreview(true);
+      setIsAIProcessing(false);
+    }, attachments.length > 0 ? 2600 : 2100);
   };
 
   // ── 生成模拟骨架模块 ─────────────────────────────────────────────────────────
@@ -441,6 +631,14 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg-root)' }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_ATTACHMENT_TYPES}
+        multiple
+        className="hidden"
+        onChange={(event) => handleSelectAttachments(event.target.files)}
+      />
       {/* 顶部 Tab 切换 + 角色切换 */}
       <div className="flex items-center justify-between px-6 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}>
         <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: 'var(--bg-subtle)' }}>
@@ -620,6 +818,10 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   <span className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
                     {activeDraft ? activeDraft.title : '新对话'}
                   </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1" style={{ color: 'var(--success)', backgroundColor: 'var(--success-bg)' }} title="后台接入全能多模态大模型，支持按配置替换国产模型">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--success)' }} />
+                    多模态 AI
+                  </span>
                   {activeDraft && activeDraft.messages.length > 0 && (
                     <>
                       {(activeDraft.primaryCategory || activeDraft.taskTypes[0]) && (
@@ -780,6 +982,7 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                   </AnimatePresence>
 
                   <div className="rounded-3xl p-3" style={{ border: '1px solid var(--market-brand-ring)', backgroundColor: 'var(--bg-surface)', boxShadow: 'var(--market-shadow-hover)' }}>
+                    <PendingAttachmentList attachments={pendingAttachments} onRemove={removePendingAttachment} />
                     <textarea
                       ref={inputRef}
                       value={inputValue}
@@ -797,7 +1000,7 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                     />
                     <div className="flex items-center justify-between gap-3 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                       <div className="flex items-center gap-2 min-w-0">
-                        <button className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} title="上传文档或图片" aria-label="上传文档或图片">
+                        <button onClick={() => fileInputRef.current?.click()} className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} title="上传图片或文档（最多3个）" aria-label="上传图片或文档">
                           <Paperclip className="w-4 h-4" />
                         </button>
                         {selectedPrimary ? (
@@ -814,7 +1017,7 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                       </div>
                       <button
                         onClick={handleSend}
-                        disabled={!inputValue.trim()}
+                        disabled={(!inputValue.trim() && pendingAttachments.length === 0) || isAIProcessing}
                         className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-35 enabled:hover:scale-105 active:scale-[0.98]"
                         style={{ backgroundColor: 'var(--market-brand)', color: 'white' }}
                         aria-label="开始对话"
@@ -824,35 +1027,27 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                     </div>
                   </div>
                   <p className="text-[11px] mt-3 text-center" style={{ color: 'var(--text-tertiary)' }}>
-                    Ctrl + Enter 发送 · 分类仅作为初始线索，AI 会根据对话内容动态调整
+                    支持图片、PDF、Word、文本 · 单个文件不超过 20 MB · Ctrl + Enter 发送
                   </p>
                 </div>
               </div>
             ) : (
               <div className="max-w-3xl mx-auto space-y-4">
                 {activeDraft.messages.map(msg => (
-                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`flex gap-2.5 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                      {/* 头像 */}
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: msg.role === 'ai' ? 'var(--brand-subtle)' : 'var(--bg-subtle)',
-                        }}>
-                        {msg.role === 'ai' ? <Sparkles className="w-4 h-4" style={{ color: 'var(--brand)' }} /> : <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>我</span>}
-                      </div>
-                      {/* 消息气泡 */}
-                      <div className="rounded-lg px-3.5 py-2.5 whitespace-pre-wrap"
-                        style={{
-                          backgroundColor: msg.role === 'ai' ? 'var(--bg-surface)' : 'var(--brand)',
-                          color: msg.role === 'ai' ? 'var(--text-primary)' : 'var(--text-inverse)',
-                          border: msg.role === 'ai' ? '1px solid var(--border-subtle)' : 'none',
-                          boxShadow: msg.role === 'ai' ? 'var(--shadow-card)' : 'none',
-                        }}>
-                        <p className="text-[13px] leading-relaxed">{msg.content}</p>
-                      </div>
-                    </div>
-                  </div>
+                  <ChatMessageBubble
+                    key={msg.id}
+                    message={msg}
+                    copied={copiedMessageId === msg.id}
+                    onCopy={() => handleCopyMessage(msg)}
+                    onDownload={(file) => handleDownloadGeneratedFile(msg, file)}
+                  />
                 ))}
+                {isAIProcessing && (
+                  <AIProcessingIndicator
+                    hasAttachments={Boolean(activeDraft.messages[activeDraft.messages.length - 1]?.attachments?.length)}
+                    activeStage={aiThinkingStage}
+                  />
+                )}
                 <div ref={messagesEndRef} />
               </div>
             )}
@@ -862,8 +1057,10 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
           {!readonlyOrder && !isNewDialogueState && (
           <div className="px-6 py-4" style={{ borderTop: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface)' }}>
             <div className="max-w-3xl mx-auto">
-              <div className="flex items-end gap-2 rounded-3xl p-3" style={{ border: '1px solid var(--market-brand-ring)', backgroundColor: 'var(--bg-surface)', boxShadow: 'var(--market-shadow-hover)' }}>
-                <button className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} title="上传文档">
+              <div className="rounded-3xl p-3" style={{ border: '1px solid var(--market-brand-ring)', backgroundColor: 'var(--bg-surface)', boxShadow: 'var(--market-shadow-hover)' }}>
+                <PendingAttachmentList attachments={pendingAttachments} onRemove={removePendingAttachment} />
+                <div className="flex items-end gap-2">
+                <button onClick={() => fileInputRef.current?.click()} disabled={pendingAttachments.length >= 3 || isAIProcessing} className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--bg-hover)] shrink-0 disabled:opacity-40" style={{ color: 'var(--text-tertiary)' }} title="上传图片或文档（最多3个）">
                   <Paperclip className="w-4 h-4" />
                 </button>
                 <textarea
@@ -878,15 +1075,16 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!inputValue.trim()}
+                  disabled={(!inputValue.trim() && pendingAttachments.length === 0) || isAIProcessing}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-40 enabled:hover:scale-105"
                   style={{ backgroundColor: 'var(--market-brand)', color: 'white' }}
                 >
-                  <Send className="w-4 h-4" />
+                  {isAIProcessing ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
+                </div>
               </div>
               <p className="text-[10px] mt-1.5 text-center" style={{ color: 'var(--text-tertiary)' }}>
-                AI 由大模型驱动，可能会产生不准确的信息。订单提交前请仔细确认草稿内容。
+                AI 可理解文本、图片和文档，生成内容可能存在偏差，提交订单前请仔细确认。
               </p>
             </div>
           </div>
@@ -1032,6 +1230,203 @@ export function DialogueWorkbench({ userRole, setUserRole, setCurrentPage, onNav
   );
 }
 
+function PendingAttachmentList({ attachments, onRemove }: { attachments: ChatAttachment[]; onRemove: (id: string) => void }) {
+  if (attachments.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2 pb-3 mb-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      {attachments.map(file => (
+        <div key={file.id} className="flex items-center gap-2 p-2 rounded-xl max-w-[240px]" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)' }}>
+          {file.previewUrl ? (
+            <img src={file.previewUrl} alt={file.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+          ) : (
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--brand-subtle)', color: 'var(--brand)' }}>
+              <FileText className="w-4 h-4" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{file.name}</div>
+            <div className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{file.size} · 待发送</div>
+          </div>
+          <button onClick={() => onRemove(file.id)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[var(--bg-hover)] shrink-0" style={{ color: 'var(--text-tertiary)' }} aria-label={`移除${file.name}`}>
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MessageAttachmentCard({ attachment }: { attachment: ChatAttachment }) {
+  const processing = attachment.status === 'analyzing';
+  return (
+    <div className="flex items-center gap-2 p-2 rounded-lg mt-2" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)' }}>
+      {attachment.previewUrl ? (
+        <img src={attachment.previewUrl} alt={attachment.name} className="w-12 h-12 rounded-md object-cover shrink-0" />
+      ) : (
+        <div className="w-10 h-10 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--brand-subtle)', color: 'var(--brand)' }}>
+          {attachment.type === 'image' ? <Image className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{attachment.name}</div>
+        <div className="text-[10px] flex items-center gap-1" style={{ color: processing ? 'var(--brand)' : 'var(--success)' }}>
+          {processing ? <LoaderCircle className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+          {processing ? '正在识别并解析' : `已解析 · ${attachment.size}`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarkdownMessage({ content }: { content: string }) {
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const copyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 1600);
+    } catch {
+      setCopiedCode(null);
+    }
+  };
+  return (
+    <div className="text-[13px] leading-relaxed min-w-0">
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
+          blockquote: ({ children }) => <blockquote className="pl-3 my-2" style={{ borderLeft: '3px solid var(--brand-ring)', color: 'var(--text-secondary)' }}>{children}</blockquote>,
+          code: ({ className, children, ...props }) => {
+            const code = String(children).replace(/\n$/, '');
+            const language = /language-([\w-]+)/.exec(className || '')?.[1];
+            const isBlock = Boolean(className) || code.includes('\n');
+            if (!isBlock) return <code className="px-1 py-0.5 rounded text-[12px]" style={{ backgroundColor: 'var(--bg-subtle)', color: 'var(--brand)' }} {...props}>{children}</code>;
+            return (
+              <div className="my-3 rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--code-bg, #16181d)' }}>
+                <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid var(--border-default)', backgroundColor: 'var(--bg-subtle)' }}>
+                  <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{language || '代码'}</span>
+                  <button onClick={() => copyCode(code)} className="flex items-center gap-1 text-[10px] hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                    {copiedCode === code ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}{copiedCode === code ? '已复制' : '复制代码'}
+                  </button>
+                </div>
+                <pre className="m-0 p-3 overflow-x-auto text-[12px] leading-5 font-mono" style={{ color: '#E6EDF3' }}><code>{code}</code></pre>
+              </div>
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function ChatMessageBubble({ message, copied, onCopy, onDownload }: { message: ChatMessage; copied: boolean; onCopy: () => void; onDownload: (file?: GeneratedFile) => void }) {
+  const isAI = message.role === 'ai';
+  return (
+    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'}`}>
+      <div className={`group flex gap-2.5 max-w-[82%] ${isAI ? '' : 'flex-row-reverse'}`}>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: isAI ? 'var(--brand-subtle)' : 'var(--bg-subtle)' }}>
+          {isAI ? <Sparkles className="w-4 h-4" style={{ color: 'var(--brand)' }} /> : <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>我</span>}
+        </div>
+        <div className="min-w-0">
+          <div className="rounded-lg px-3.5 py-2.5 whitespace-pre-wrap" style={{ backgroundColor: isAI ? 'var(--bg-surface)' : 'var(--brand)', color: isAI ? 'var(--text-primary)' : 'var(--text-inverse)', border: isAI ? '1px solid var(--border-subtle)' : 'none', boxShadow: isAI ? 'var(--shadow-card)' : 'none' }}>
+            {isAI ? <MarkdownMessage content={message.content} /> : <p className="text-[13px] leading-relaxed">{message.content}</p>}
+            {message.attachments?.map(file => <MessageAttachmentCard key={file.id} attachment={file} />)}
+            {(message.generatedFiles || (message.generatedFile ? [message.generatedFile] : [])).length > 0 && (
+              <div className="mt-3 space-y-2">
+                <div className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>AI 已生成以下文件</div>
+                {(message.generatedFiles || [message.generatedFile!]).map(file => (
+                  <div key={file.name} className="p-3 rounded-lg flex items-center gap-3" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border-default)' }}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ color: 'var(--brand)', backgroundColor: 'var(--brand-subtle)' }}><FileText className="w-4 h-4" /></div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{file.name}</div>
+                      <div className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{file.description} · {file.size}</div>
+                    </div>
+                    <button onClick={() => onDownload(file)} className="px-2.5 py-1.5 rounded-md text-[11px] font-medium flex items-center gap-1 hover:bg-[var(--bg-hover)]" style={{ color: 'var(--brand)', border: '1px solid var(--brand-ring)' }}>
+                      <Download className="w-3.5 h-3.5" /> 下载
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {isAI && (
+            <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <button onClick={onCopy} className="h-7 px-2 rounded-md flex items-center gap-1 text-[10px] hover:bg-[var(--bg-hover)]" style={{ color: 'var(--text-tertiary)' }}>
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}{copied ? '已复制' : '复制'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AIProcessingIndicator({ hasAttachments, activeStage }: { hasAttachments: boolean; activeStage: number }) {
+  const stages = hasAttachments
+    ? ['识别图片与文档', '提取项目关键信息', '整理为订单草稿']
+    : ['理解当前需求', '结合对话上下文', '组织回复与订单信息'];
+  return (
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start" aria-live="polite">
+      <div className="flex gap-2.5 max-w-[86%]">
+        <motion.div
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: 'var(--brand-subtle)' }}
+        >
+          <BrainCircuit className="w-4 h-4" style={{ color: 'var(--brand)' }} />
+        </motion.div>
+        <div className="rounded-xl px-4 py-3.5 min-w-[300px]" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--brand-ring)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>AI 正在思考</span>
+              <span className="flex gap-1" aria-hidden="true">
+                {[0, 1, 2].map(dot => (
+                  <motion.span
+                    key={dot}
+                    className="w-1 h-1 rounded-full"
+                    style={{ backgroundColor: 'var(--brand)' }}
+                    animate={{ opacity: [0.25, 1, 0.25], y: [0, -2, 0] }}
+                    transition={{ duration: 0.9, repeat: Infinity, delay: dot * 0.16 }}
+                  />
+                ))}
+              </span>
+            </div>
+            <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>请稍候</span>
+          </div>
+          <div className="space-y-2">
+            {stages.map((stage, index) => {
+              const completed = index < activeStage;
+              const active = index === activeStage;
+              return (
+                <div key={stage} className="flex items-center gap-2.5">
+                  <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: completed ? 'var(--success-bg)' : active ? 'var(--brand-subtle)' : 'var(--bg-subtle)', color: completed ? 'var(--success)' : active ? 'var(--brand)' : 'var(--text-disabled)' }}>
+                    {completed ? <Check className="w-2.5 h-2.5" /> : active ? <LoaderCircle className="w-2.5 h-2.5 animate-spin" /> : <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'currentColor' }} />}
+                  </div>
+                  <span className="text-[11px] transition-colors" style={{ color: completed ? 'var(--text-tertiary)' : active ? 'var(--text-primary)' : 'var(--text-disabled)' }}>{stage}</span>
+                  {active && <span className="text-[10px] ml-auto" style={{ color: 'var(--brand)' }}>处理中</span>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-subtle)' }}>
+            <motion.div
+              className="h-full rounded-full"
+              style={{ backgroundColor: 'var(--brand)' }}
+              animate={{ width: `${Math.min(92, 28 + activeStage * 30)}%` }}
+              transition={{ duration: 0.35 }}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── 骨架模块卡片子组件 ─────────────────────────────────────────────────────────
 function DraftModuleCard({ module, isEditing, onRegenerate, onEdit, onSave, readonly }: {
   module: SkeletonModule;
@@ -1047,7 +1442,7 @@ function DraftModuleCard({ module, isEditing, onRegenerate, onEdit, onSave, read
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-subtle)', backgroundColor: module.filled ? 'var(--bg-surface)' : 'var(--bg-subtle)' }}>
       {/* 卡片头部 */}
       <div className="flex items-center justify-between px-3.5 py-2.5" style={{ borderBottom: module.filled ? '1px solid var(--border-subtle)' : 'none' }}>
-        <div className="flex items-center gap 2">
+        <div className="flex items-center gap-2">
           {module.type === 'structured' ? <Tag className="w-3.5 h-3.5" style={{ color: 'var(--text-tertiary)' }} /> : <FileText className="w-3.5 h-3.5" style={{ color: 'var(--text-tertiary)' }} />}
           <span className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>{module.name}</span>
         </div>
